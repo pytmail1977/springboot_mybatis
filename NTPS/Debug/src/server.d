@@ -1,1 +1,1 @@
-src/server.d: ../src/server.c
+src/server.o: ../src/server.c
