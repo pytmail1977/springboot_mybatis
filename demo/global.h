@@ -1,0 +1,85 @@
+/*
+ * global.h
+ *
+ *  Created on: 2017年5月11日
+ *      Author: pyt64
+ */
+
+#ifndef GLOBAL_H_
+#define GLOBAL_H_
+
+#include "include.h"
+#include "includecpp.h"
+#include "complier.h"
+#include "const.h"
+#include "debug.h"
+#include "struct.h"
+
+//////////////////////////////////////
+//运行控制相关
+//////////////////////////////////////
+//指示是否按下的CTRL+C/
+extern __uint8_t gIntIsRun;
+
+//////////////////////////////////////
+//进程和线程相关
+//////////////////////////////////////
+//进程和线程id
+//进程id
+extern __int32_t gPid;
+//主线程id
+extern __uint64_t gTid;
+
+
+
+////////////////////////////////////
+//状态相关
+////////////////////////////////////
+//数据库链接状态
+extern __uint32_t gIntIsDbConnected;
+
+
+
+
+
+////////////////////////////////////
+//服务句柄
+////////////////////////////////////
+
+extern mysql_t gMysql[2];//每个线程一个数据库链接
+
+////////////////////////////////////
+//计数变量
+////////////////////////////////////
+//指令计数
+extern __uint8_t gZlCount;
+//应用心跳信息
+extern __uint32_t gYySxxt;
+//基础定时器超时次数
+extern __uint64_t gBaseTimerCount;
+
+////////////////////////////////////
+//记录变量
+////////////////////////////////////
+//记录最近的指令类型
+extern __uint8_t gNewZllx;
+//记录最近的指令编号
+extern __uint8_t gNewZlbh;
+
+
+
+
+//程序执行状态
+extern int gIntMyProgramZt;
+
+//实时遥测数据
+extern ssyc_myProgram_t gMyProgramYcData;
+
+
+///////////////////////////////////
+//调试相关
+//////////////////////////////////
+extern total_t gTotal;
+
+#endif /* GLOBAL_H_ */
+
