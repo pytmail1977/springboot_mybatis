@@ -43,7 +43,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.12</version>
+			<version>5.1.40</version>
 		</dependency>
 		<dependency>
     		<groupId>com.thoughtworks.xstream</groupId>
@@ -54,6 +54,23 @@
     		<groupId>dom4j</groupId>
     		<artifactId>dom4j</artifactId>
     		<version>1.6.1</version>
+   		 </dependency>
+   		 <dependency>
+   		 	<groupId>org.hamcrest</groupId>
+   		 	<artifactId>hamcrest-library</artifactId>
+   		 </dependency>
+   		 <dependency>
+   		 	<groupId>org.hamcrest</groupId>
+   		 	<artifactId>hamcrest-core</artifactId>
+   		 </dependency>
+   		 <dependency>
+   		 	<groupId>junit</groupId>
+   		 	<artifactId>junit</artifactId>
+   		 </dependency>
+   		 <dependency>
+   		 	<groupId>commons-logging</groupId>
+   		 	<artifactId>commons-logging</artifactId>
+   		 	<version>1.2</version>
    		 </dependency>
 	</dependencies>
 
