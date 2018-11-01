@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+  <context id="context1">
+  	<!--数据库链接地址账号密码-->
+    <jdbcConnection connectionURL="jdbc:mysql://localhost:3306/java" driverClass="com.mysql.jdbc.Driver" password="pyt999" userId="root" />
+    <!--生成Model类存放位置-->
+    <javaModelGenerator targetPackage="org.iscas.tj2.pyt.springboot_mybatis.domain" targetProject="springboot_mybatis" />
+    <!--生成映射文件存放位置-->
+    <sqlMapGenerator targetPackage="org.iscas.tj2.pyt.springboot_mybatis.mapper" targetProject="springboot_mybatis" />
+     <!--生成Dao类存放位置-->
+    <javaClientGenerator targetPackage="org.iscas.tj2.pyt.springboot_mybatis.dao" targetProject="springboot_mybatis" type="XMLMAPPER" />
+    <!--生成对应表及类名-->
+    <table tableName="java.FuncProjectRelation" domainObjectName="FuncProjectRelation">  </table>
+    <table tableName="java.FuncStatement" domainObjectName="FuncStatement">  </table>
+    <table tableName="java.Function" domainObjectName="Function">  </table>
+    <table tableName="java.FuncVar" domainObjectName="FuncVar">  </table>
+    <table tableName="java.FuncVarItem" domainObjectName="FuncVarItem">  </table>
+    <table tableName="java.NameSpace" domainObjectName="NameSpace">  </table>
+    <table tableName="java.Permission" domainObjectName="Permission">  </table>
+    <table tableName="java.Project" domainObjectName="Project">  </table>
+    <table tableName="java.Role" domainObjectName="Role">  </table>
+    <table tableName="java.RolePRMSRelation" domainObjectName="RolePRMSRelation">  </table>
+    <table tableName="java.Struct" domainObjectName="Struct">  </table>
+    <table tableName="java.StructItem" domainObjectName="StructItem">  </table>
+   	<table tableName="java.StructUserRelation" domainObjectName="StructUserRelation">  </table>
+    <table tableName="java.Type" domainObjectName="Type">  </table>
+    <table tableName="java.TypeUserRelation" domainObjectName="TypeUserRelation">  </table>
+    <table tableName="java.User" domainObjectName="User"> <property name="useActualColumnNames" value="true" /> </table>
+    <table tableName="java.UserMessage" domainObjectName="UserMessage">  </table>
+    <table tableName="java.UserMessageTemplet" domainObjectName="UserMessageTemplet">  </table>
+    <table tableName="java.UserRoleRelation" domainObjectName="UserRoleRelation">  </table>
+    <table tableName="java.Var" domainObjectName="Var">  </table>
+    <table tableName="java.VarItem" domainObjectName="VarItem">  </table>
+    <table tableName="java.VarProjectRelation" domainObjectName="VarProjectRelation">  </table>     
+    <!--<table tableName="java.User" domainObjectName="User">-->
+    <!--  <property name="useActualColumnNames" value="true" />-->
+    <!--</table>-->
+  </context>
+</generatorConfiguration>

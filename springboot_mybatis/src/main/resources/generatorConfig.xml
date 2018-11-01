@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+	<context id="java">
+		<!--数据库链接地址账号密码 -->
+		<jdbcConnection
+			connectionURL="jdbc:mysql://localhost:3306/java"
+			driverClass="com.mysql.jdbc.Driver" password="pyt999" userId="root" />
+			
+		<!--生成Model类存放位置 -->
+		<javaModelGenerator
+			targetPackage="org.iscas.tj2.pyt.springboot_mybatis.domain"
+			targetProject="springboot_mybatis">
+			<property name="enableSubPackages" value="true" />
+			<!-- 是否对model添加 构造函数 -->
+            <property name="constructorBased" value="true"/>
+			<property name="trimStrings" value="true" />
+		</javaModelGenerator>
+
+		<!-- 生成XML映射文件 -->
+		<sqlMapGenerator
+			targetPackage="org.iscas.tj2.pyt.springboot_mybatis.mapper"
+			targetProject="springboot_mybatis">
+			<property name="enableSubPackages" value="true" />
+		</sqlMapGenerator>
+
+		<!-- 生成Mapper接口(DAO) -->
+		<javaClientGenerator type="XMLMAPPER"
+			targetPackage="org.iscas.tj2.pyt.springboot_mybatis.dao"
+			targetProject="springboot_mybatis">
+			<property name="enableSubPackages" value="true" />
+		</javaClientGenerator>
+
+
+		<!--生成对应表及类名 -->
+		<table tableName="java.FuncProjectRelation"
+			domainObjectName="FuncProjectRelation" enableCountByExample="false"
+			enableUpdateByExample="false" enableDeleteByExample="false"
+			enableSelectByExample="false" selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.FuncStatement"
+			domainObjectName="FuncStatement" enableCountByExample="false"
+			enableUpdateByExample="false" enableDeleteByExample="false"
+			enableSelectByExample="false" selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.Function" domainObjectName="Function"
+			enableCountByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableSelectByExample="false"
+			selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.FuncVar" domainObjectName="FuncVar"
+			enableCountByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableSelectByExample="false"
+			selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.FuncVarItem"
+			domainObjectName="FuncVarItem" enableCountByExample="false"
+			enableUpdateByExample="false" enableDeleteByExample="false"
+			enableSelectByExample="false" selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.NameSpace" domainObjectName="NameSpace"
+			enableCountByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableSelectByExample="false"
+			selectByExampleQueryId="false">
+		</table>
+		<table tableName="java.Permission" domainObjectName="Permission"
+			enableCountByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableSelectByExample="false"
+			selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.Project" domainObjectName="Project"
+			enableCountByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableSelectByExample="false"
+			selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.Role" domainObjectName="Role"
+			enableCountByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableSelectByExample="false"
+			selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.RolePRMSRelation"
+			domainObjectName="RolePRMSRelation" enableCountByExample="false"
+			enableUpdateByExample="false" enableDeleteByExample="false"
+			enableSelectByExample="false" selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.Struct" domainObjectName="Struct"
+			enableCountByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableSelectByExample="false"
+			selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.StructItem" domainObjectName="StructItem"
+			enableCountByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableSelectByExample="false"
+			selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.StructUserRelation"
+			domainObjectName="StructUserRelation" enableCountByExample="false"
+			enableUpdateByExample="false" enableDeleteByExample="false"
+			enableSelectByExample="false" selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.Type" domainObjectName="Type"
+			enableCountByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableSelectByExample="false"
+			selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.TypeUserRelation"
+			domainObjectName="TypeUserRelation" enableCountByExample="false"
+			enableUpdateByExample="false" enableDeleteByExample="false"
+			enableSelectByExample="false" selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.User" domainObjectName="User">
+			<property name="useActualColumnNames" value="true" />
+		</table>
+		
+		<table tableName="java.UserMessage"
+			domainObjectName="UserMessage" enableCountByExample="false"
+			enableUpdateByExample="false" enableDeleteByExample="false"
+			enableSelectByExample="false" selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.UserMessageTemplet"
+			domainObjectName="UserMessageTemplet" enableCountByExample="false"
+			enableUpdateByExample="false" enableDeleteByExample="false"
+			enableSelectByExample="false" selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.UserRoleRelation"
+			domainObjectName="UserRoleRelation" enableCountByExample="false"
+			enableUpdateByExample="false" enableDeleteByExample="false"
+			enableSelectByExample="false" selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.Var" domainObjectName="Var"
+			enableCountByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableSelectByExample="false"
+			selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.VarItem" domainObjectName="VarItem"
+			enableCountByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableSelectByExample="false"
+			selectByExampleQueryId="false">
+		</table>
+		
+		<table tableName="java.VarProjectRelation"
+			domainObjectName="VarProjectRelation" enableCountByExample="false"
+			enableUpdateByExample="false" enableDeleteByExample="false"
+			enableSelectByExample="false" selectByExampleQueryId="false">
+		</table>
+
+	</context>
+</generatorConfiguration>
