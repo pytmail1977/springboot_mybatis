@@ -2,7 +2,7 @@ package org.iscas.tj2.pyt.springboot_mybatis.util;
 
 import java.util.Date;
 
-import org.iscas.tj2.pyt.springboot_mybatis.model.message.TextMessage;
+import org.iscas.tj2.pyt.springboot_mybatis.model.message.resp.TextMessage;
 import org.springframework.stereotype.Service;
 
 import com.thoughtworks.xstream.XStream;

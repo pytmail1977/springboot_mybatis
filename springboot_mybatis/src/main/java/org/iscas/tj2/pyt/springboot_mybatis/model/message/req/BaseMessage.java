@@ -1,4 +1,4 @@
-package org.iscas.tj2.pyt.springboot_mybatis.model.message;
+package org.iscas.tj2.pyt.springboot_mybatis.model.message.req;
 
 public class BaseMessage {
 	protected String ToUserName;

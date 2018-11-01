@@ -1,4 +1,4 @@
-package org.iscas.tj2.pyt.springboot_mybatis.model.message;
+package org.iscas.tj2.pyt.springboot_mybatis.model.message.resp;
 
 public class Article {
     // 图文消息名称

@@ -1,4 +1,4 @@
-package org.iscas.tj2.pyt.springboot_mybatis.model.message;
+package org.iscas.tj2.pyt.springboot_mybatis.model.message.req;
 
 public class MenuMessage extends BaseMessage {
     private String EventKey;

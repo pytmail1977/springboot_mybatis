@@ -1,4 +1,4 @@
-package org.iscas.tj2.pyt.springboot_mybatis.model.message;
+package org.iscas.tj2.pyt.springboot_mybatis.model.message.req;
 
 public class LocationMessage extends BaseMessage {
 	    // 地理位置维度
