@@ -68,12 +68,18 @@ public class testDomainProject {
 			}
 		}
 		
-		
-
 
 		System.out.println(strContent);
 		System.out.println("-----------------");
 	}
 	
+	@Test
+	public void testInsertProject() {
+       	Project proj = new Project();
+    	proj.setNameProject("NameProject");
+    	proj.setMemoProject("MemoProject");
+    	proj.setVersionProject("VerstionProject");
+    	db.createProject(1,proj);
+	}
 	
 }
