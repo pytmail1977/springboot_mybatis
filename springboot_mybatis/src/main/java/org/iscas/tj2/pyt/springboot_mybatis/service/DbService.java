@@ -20,9 +20,11 @@ import org.iscas.tj2.pyt.springboot_mybatis.domain.Role;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.RolePRMSRelation;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.User;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.UserRoleRelation;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
-@Service("DbService")
+//@Service("DbService")
+@Repository("DbService")
 public class DbService {
 	private SqlSessionFactory sessionFactory;//
 	

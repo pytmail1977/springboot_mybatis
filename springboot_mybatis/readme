@@ -1,0 +1,38 @@
+2018-11-03
+1.在DbService上
+	@Service("DbService")
+	改为
+	@Repository("DbService")
+2.在CoreServiceImpl上
+	@Service("CoreService") 
+	改为
+	@Service("Normal") 
+3.在CoreController上
+    @Autowired
+    下，添加
+    @Qualifier("JHSBC")
+4.在CoreController上
+	private CoreServiceImplJHSBC jhsbcService;
+	改回
+	private CoreService coreService;
+	
+	String respMessage = jhsbcService.processRequest(req);
+	改回
+	String respMessage = coreService.processRequest(req);
+5.去掉CoreServiceImpl中的@Autowired
+6.去掉CoreServiceImplJHSBC中的@Autowired
+7.工程（右键）-》Run as-》Maven install
+	成功生成target/springboot_mybatis-0.0.1-SNAPSHOT.jar
+8.jar包不易部署，在pom.xml改jar为war
+9.针对易地部署根据（https://blog.csdn.net/soldier_123/article/details/78917227）要排除springboot集成的tomcat“spring-boot-starter-tomcat”。有两种方法啊，暂时都未使用。
+10.增加一个包testService
+11.在包testService中增加一个接口类ITestService。
+12.增加一个对接口类ITestService的实现TestService。
+13.在控制组件CoreController中增加对接口ITestService的注入。并仿照post增加一个方法postTest，调用testService.processRequest处理
+14.为了打包到深信服服务器（tomcat使用80端口），打包时修改配置application.properties当中配置的端口server.port=8080，由8080改为80。（打包完成后需要改回来）
+
+2018-11-04
+1.maven clean之后，maven install，再次出现找不到
+	o.m.s.mapper.ClassPathMapperScanner      : No MyBatis mapper was found in
+先继续写
+

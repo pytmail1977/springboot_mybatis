@@ -24,8 +24,8 @@
         <mapper resource="org/iscas/tj2/pyt/springboot_mybatis/mapper/FuncStatementMapper.xml"/>
         <mapper resource="org/iscas/tj2/pyt/springboot_mybatis/mapper/FunctionMapper.xml"/>
         <mapper resource="org/iscas/tj2/pyt/springboot_mybatis/mapper/FuncVarMapper.xml"/>
-        <mapper resource="org/iscas/tj2/pyt/springboot_mybatis/mapper/FuncVarItemRelationMapper.xml"/>
-        <mapper resource="org/iscas/tj2/pyt/springboot_mybatis/mapper/StrunctItemMapper.xml"/>
+        <mapper resource="org/iscas/tj2/pyt/springboot_mybatis/mapper/FuncVarItemMapper.xml"/>
+        <mapper resource="org/iscas/tj2/pyt/springboot_mybatis/mapper/StructItemMapper.xml"/>
         <mapper resource="org/iscas/tj2/pyt/springboot_mybatis/mapper/StructMapper.xml"/>
         <mapper resource="org/iscas/tj2/pyt/springboot_mybatis/mapper/StructUserRelationMapper.xml"/>
         <mapper resource="org/iscas/tj2/pyt/springboot_mybatis/mapper/TypeMapper.xml"/>

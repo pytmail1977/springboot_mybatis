@@ -28,10 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("JHSBC") //用于标注业务层组件
-public class CoreServiceImplJHSBC implements CoreService {
-	@Autowired
-    private TextMessageUtil textMessageUtil;
-	@Autowired
+public class CoreServiceImplJHSBC implements ICoreService {	
+    private TextMessageUtil textMessageUtil;	
 	private DbService db = new DbService();
 	int state = 0;
 	int idUser = 0;

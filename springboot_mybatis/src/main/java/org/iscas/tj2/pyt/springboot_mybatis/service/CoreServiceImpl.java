@@ -22,10 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service("CoreService") //用于标注业务层组件
-public class CoreServiceImpl implements CoreService {
+@Service("Normal") //用于标注业务层组件
+public class CoreServiceImpl implements ICoreService {
 	
-	@Autowired
     private TextMessageUtil textMessageUtil;
 	@Override
 	public String processRequest(HttpServletRequest request) {

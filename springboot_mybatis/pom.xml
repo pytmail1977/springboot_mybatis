@@ -6,7 +6,7 @@
 	<groupId>org.iscas.tj2.pyt</groupId>
 	<artifactId>springboot_mybatis</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<name>springboot_mybatis</name>
 	<description>springboot+mybatis for wenxin</description>
@@ -79,6 +79,10 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<!-- 自己加的，为了打包发布 -->
+				<configuration>
+                    <mainClass>org.iscas.tj2.pyt.springboot_mybatis.SpringbootMybatisApplication</mainClass>
+                </configuration>
 			</plugin>
 		</plugins>
 		<!-- pyt add 20180822 -->
