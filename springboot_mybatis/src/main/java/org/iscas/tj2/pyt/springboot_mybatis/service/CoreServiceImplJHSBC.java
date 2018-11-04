@@ -21,6 +21,8 @@ import org.iscas.tj2.pyt.springboot_mybatis.domain.Project;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.User;
 import org.iscas.tj2.pyt.springboot_mybatis.model.message.resp.TextMessage;
 import org.iscas.tj2.pyt.springboot_mybatis.util.MessageUtil;
+import org.iscas.tj2.pyt.springboot_mybatis.util.State;
+import org.iscas.tj2.pyt.springboot_mybatis.util.StateStack;
 import org.iscas.tj2.pyt.springboot_mybatis.util.TextMessageUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +33,12 @@ import org.springframework.stereotype.Service;
 public class CoreServiceImplJHSBC implements ICoreService {	
     private TextMessageUtil textMessageUtil;	
 	private DbService db = new DbService();
-	int state = 0;
-	int idUser = 0;
+	int state = 0; //0:正在浏览用户基本信息；1:用户在创建
+	int idOldUser = 0;
+	
+	//TODO
+	//状态深度暂时设为10，下一步要改为常数
+	StateStack stack = new StateStack(10);
 
 	Map<String, String> map = new HashMap<String, String>();
 	
@@ -52,10 +58,30 @@ public class CoreServiceImplJHSBC implements ICoreService {
 			// 消息类型
 			String msgType = requestMap.get("MsgType");
 
-			//从数据库查询用户信息，记录Id_User
+			//从数据库查询用户信息，记录Id_User，如果没有结果就插入一条记录。
     		System.out.println("从数据库查询用户信息：");
-        	User user = db.getUserInfo(fromUserName);
-        	idUser = user.getId_User();
+        	User user = null;
+        	user = db.getUserInfo(fromUserName);
+        	//如果没有结果就插入一条记录。
+        	if (null == user) {
+        		User newUser = new User();
+        		newUser.setWeixinId_User(fromUserName);
+        		int idUser = db.insertNewUser(newUser);
+        		//如果插入新用户成功，就记录到状态栈中
+        		if (0 != idUser) {
+        			State state = new State(idUser,fromUserName,0,"用户:"+fromUserName);
+        			stack.push(state);
+        			idOldUser = idUser;
+        		}
+        	}else{//如果查询到就记录到状态栈中
+        		int idUser = user.getId_User();
+    			State state = new State(idUser,fromUserName,0,"用户:"+fromUserName);
+    			stack.push(state);
+    			idOldUser = idUser;
+        	}//if (null == user) 
+        	
+        	
+        	
 			
 			// 回复文本消息，注意此处TextMessage是在包org.iscas.tj2.pyt.springboot_mybatis.model.message.resp.TextMessage中定义的
 			TextMessage textMessage = new TextMessage();
@@ -187,7 +213,7 @@ public class CoreServiceImplJHSBC implements ICoreService {
                                 	proj.setMemoProject(map.get("MemoProject"));
                                 	//proj.setOpensourceProject(Integer.parseInt(map.get("OpenSource")));
                                 	proj.setVersionProject(map.get("VerstionProject"));
-                                	int ret = db.createProject(idUser,proj);
+                                	int ret = db.createProject(idOldUser,proj);
                                 	if (0 == ret) {
                                 		respContent = "工程已成功创建";            		
                                 	}else {

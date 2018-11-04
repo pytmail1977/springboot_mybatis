@@ -34,5 +34,14 @@
 2018-11-04
 1.maven clean之后，maven install，再次出现找不到
 	o.m.s.mapper.ClassPathMapperScanner      : No MyBatis mapper was found in
+	发现问题在于新建State类的时候，不当使用了@Autowired，去掉后问题消失，再次maven install，又再次出现
 先继续写
-
+1.完善State类
+	增加两个属性
+		private String strComment; //上下文描述
+		private int intDepeth; //上下文深度	
+	增加setter和getter
+2.完善StateStack类
+	增加一个返回当前上下文提示字符串的方法context()
+3.修改CoreServiceImplJHSBC，根据用户微信号查询User表，如果没有结果就插入一条记录。
+4.在DbService中加入一个函数insertNewUser，插入一条新的用户记录

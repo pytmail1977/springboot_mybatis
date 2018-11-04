@@ -16,7 +16,44 @@ public class StateStack {
 	public int push(State state) {
 		stack[top++] = state;
 		return top;
+	}	
+	
+	public State pop() {
+		return stack[top--];
 	}
 	
+	public int sizeof() {
+		return top+1;
+	}
+	
+	public void clean() {
+		top = -1;
+	}
+	
+	//增加一个返回当前上下文提示字符串的方法
+	public String context() {
+		String strTmp = "";
+		for(int i = 0;i<=top; i++) {
+			strTmp += stack[i].getStrComment();
+			strTmp += "/";
+		}
+		return strTmp;		
+	}
+	
+
+	/**
+	 * 返回当前状态栈的用户id
+	 * @return
+	 * -1:当前用户栈为空或指定深度超出了范围
+	 * 其它：当前栈的第depth层的id
+	 */
+	public int getWhoseId(int depth) {
+		if(top>=depth && depth>=0) {
+			return stack[depth].getIntId();
+		}else
+			return -1;
+	}
+
+
 
 }

@@ -156,7 +156,27 @@ public class DbService {
     	return 0;
     }   
 
-    
-    
+    /**
+     * 插入一个新用户，返回它的Id_User值
+     * @param newUser
+     * @return
+     * 0:插入未成功
+     * 其他：新插入记录的Id_User值
+     */
+    public int insertNewUser(User newUser) {
+    	SqlSession session = sessionFactory.openSession();
+    	User user = null;
+    	UserMapper mapper = session.getMapper(UserMapper.class);
+    	int intId = 0;
+    	try {
+    		mapper.insertSelective(newUser);
+    		intId = newUser.getId_User();
+    		session.commit();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		session.rollback();
+    	}
+    	return intId;
+    }	
 
 }
