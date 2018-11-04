@@ -39,7 +39,7 @@
 1.完善State类
 	增加两个属性
 		private String strComment; //上下文描述
-		private int intDepeth; //上下文深度	
+		private int intDepeth; //上下文深度
 	增加setter和getter
 2.完善StateStack类
 	增加一个返回当前上下文提示字符串的方法context()
