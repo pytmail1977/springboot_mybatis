@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 @Service("Normal") //用于标注业务层组件
 public class CoreServiceImpl implements ICoreService {
 	
+	@Autowired
     private TextMessageUtil textMessageUtil;
 	@Override
 	public String processRequest(HttpServletRequest request) {

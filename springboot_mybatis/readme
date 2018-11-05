@@ -45,3 +45,22 @@
 	增加一个返回当前上下文提示字符串的方法context()
 3.修改CoreServiceImplJHSBC，根据用户微信号查询User表，如果没有结果就插入一条记录。
 4.在DbService中加入一个函数insertNewUser，插入一条新的用户记录
+5.修改CoreController，之后可以在http://localhost:8080/hello,http://localhost:8080/test中正确得到返回，而且本地微信调试，修改服务器地址url，通过token验证
+	（1）@RequestMapping(value = "core"
+		-》
+		@RequestMapping(value = ""
+	（2）@RequestMapping(value = "test",method = RequestMethod.POST)
+		-》
+		@RequestMapping("/test")
+	（3）@RequestMapping("/")
+		->
+		@RequestMapping("/hello")
+6.修改StateStack，将top初始值从-1改为0，并修改相应的边界条件。
+7.CoreServiceImplJHSBC的成员textMessageUtil必须使用@Autowired注入
+	@Autowired
+	private TextMessageUtil textMessageUtil;	
+	否则，会报textMessageUtil是空指针
+8.CoreServiceImpl的成员textMessageUtil也必须使用@Autowired注入
+9.maven install 未报错
+10.maven clean之后再maven install 还是报错
+

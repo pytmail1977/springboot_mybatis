@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 @Service("JHSBC") //用于标注业务层组件
 public class CoreServiceImplJHSBC implements ICoreService {	
+	@Autowired
     private TextMessageUtil textMessageUtil;	
 	private DbService db = new DbService();
 	int state = 0; //0:正在浏览用户基本信息；1:用户在创建

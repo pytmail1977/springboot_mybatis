@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class CoreController {
-	@RequestMapping("/")
+	
+	@RequestMapping("/hello")
 	public String Hello() {
 		return "hello this is response for request of root path";
 	}
@@ -41,7 +42,7 @@ public class CoreController {
     
 
     //调用核心业务类接收消息、处理消息跟推送消息
-    @RequestMapping(value = "/core",method = RequestMethod.POST) //@RequestMapping(value="/departments”)则访问http://localhost/xxxx/departments的时候，会调用在其下面定义的方法
+    @RequestMapping(value = "",method = RequestMethod.POST) //@RequestMapping(value="/departments”)则访问http://localhost/xxxx/departments的时候，会调用在其下面定义的方法
     public  String post(HttpServletRequest req){
         String respMessage = coreService.processRequest(req);
         //String respMessage = jhsbcService.processRequest(req);
@@ -49,7 +50,8 @@ public class CoreController {
     }
    
    
-    @RequestMapping(value = "/test",method = RequestMethod.POST) //@RequestMapping(value="/departments”)则访问http://localhost/xxxx/departments的时候，会调用在其下面定义的方法
+    //@RequestMapping(value = "test",method = RequestMethod.POST) //@RequestMapping(value="/departments”)则访问http://localhost/xxxx/departments的时候，会调用在其下面定义的方法
+    @RequestMapping("/test")
     public  String postTest(HttpServletRequest req){
     	System.out.println("Run to Here: postTest");
         String respMessage = testService.processRequest(req);

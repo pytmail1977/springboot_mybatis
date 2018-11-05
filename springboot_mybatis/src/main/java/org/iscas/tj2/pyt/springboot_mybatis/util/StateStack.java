@@ -9,7 +9,7 @@ public class StateStack {
 	public StateStack(int size) {
 		// TODO Auto-generated constructor stub
 		this.max_size = size;
-		this.top = -1;
+		this.top = 0;
 		this.stack = new State[max_size];		
 	}
 	
@@ -23,17 +23,17 @@ public class StateStack {
 	}
 	
 	public int sizeof() {
-		return top+1;
+		return top;
 	}
 	
 	public void clean() {
-		top = -1;
+		top = 0;
 	}
 	
 	//增加一个返回当前上下文提示字符串的方法
 	public String context() {
 		String strTmp = "";
-		for(int i = 0;i<=top; i++) {
+		for(int i = 0;i<top; i++) {
 			strTmp += stack[i].getStrComment();
 			strTmp += "/";
 		}

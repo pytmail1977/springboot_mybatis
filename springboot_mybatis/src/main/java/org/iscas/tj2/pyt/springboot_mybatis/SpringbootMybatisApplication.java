@@ -11,8 +11,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 //需要在启动类的@EnableAutoConfiguration或@SpringBootApplication中添加exclude
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 //@SpringBootApplication
-@MapperScan("org.iscas.tj2.pyt.springboot_mybatis.dao.FuncProjectRelationMapper")
-//public class SpringbootMybatisApplication {
+//@MapperScan("org.iscas.tj2.pyt.springboot_mybatis.dao.FuncProjectRelationMapper")
 public class SpringbootMybatisApplication extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
