@@ -8,6 +8,14 @@ public class State {
 	private int intId; //在相关表中的id
 	private String strComment; //上下文描述
 	private int intDepth; //上下文深度
+	
+	/**
+	 * 构造函数
+	 * @param intId
+	 * @param strTable
+	 * @param intDepth
+	 * @param strComment
+	 */
 	public State(int intId, String strTable,int intDepth, String strComment) {
 		this.intId = intId;
 		this.strTable = strTable;

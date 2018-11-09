@@ -15,6 +15,7 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.iscas.tj2.pyt.springboot_mybatis.Const;
 import org.iscas.tj2.pyt.springboot_mybatis.controller.LoginController;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.UserMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Project;
@@ -34,12 +35,13 @@ public class CoreServiceImplJHSBC implements ICoreService {
 	@Autowired
     private TextMessageUtil textMessageUtil;	
 	private DbService db = new DbService();
+	Const projConst = new Const();
 	int state = 0; //0:正在浏览用户基本信息；1:用户在创建
 	int idOldUser = 0;
 	
 	//TODO
 	//状态深度暂时设为10，下一步要改为常数
-	StateStack stack = new StateStack(10);
+	StateStack stack = new StateStack(projConst.maxStackDepth);
 
 	Map<String, String> map = new HashMap<String, String>();
 	
@@ -74,14 +76,17 @@ public class CoreServiceImplJHSBC implements ICoreService {
         			stack.push(state);
         			idOldUser = idUser;
         		}
+        		
         	}else{//如果查询到就记录到状态栈中
         		int idUser = user.getId_User();
     			State state = new State(idUser,fromUserName,0,"用户:"+fromUserName);
     			stack.push(state);
     			idOldUser = idUser;
+    			
         	}//if (null == user) 
         	
-        	
+        	//在返回语开头加上下文信息
+        	respContent = stack.getContext();
         	
 			
 			// 回复文本消息，注意此处TextMessage是在包org.iscas.tj2.pyt.springboot_mybatis.model.message.resp.TextMessage中定义的
@@ -107,6 +112,13 @@ public class CoreServiceImplJHSBC implements ICoreService {
                     respMessage = textMessageUtil.messageToxml(textMessage);
                 } else {
                     //回复固定消息
+/*                	switch(stack.getCurrentState().getStrTable()) {
+                	case projConst.tablename_User:
+                		break;
+                		default:
+                			break;
+                	}*/
+                	
                     switch (reqContent) {
                         case "1#": {
                             StringBuffer buffer = new StringBuffer();

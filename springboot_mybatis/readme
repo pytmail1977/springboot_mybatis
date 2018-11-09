@@ -64,3 +64,10 @@
 9.maven install 未报错
 10.maven clean之后再maven install 还是报错
 
+2018-11-07
+1.修改StateStack
+	将方法context改名为getContext。
+	新增getCurrentState方法，取当前的状态
+	
+2018-11-09
+1.将测试过的状态转移/函数指针工程testFuncPointer中的有关类Func、FuncBase、StateTransfer加入到工程里来，工程本身尚未使用这些类

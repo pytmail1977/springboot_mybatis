@@ -31,12 +31,13 @@ public class StateStack {
 	}
 	
 	//增加一个返回当前上下文提示字符串的方法
-	public String context() {
+	public String getContext() {
 		String strTmp = "";
 		for(int i = 0;i<top; i++) {
 			strTmp += stack[i].getStrComment();
 			strTmp += "/";
 		}
+		strTmp += ":>";
 		return strTmp;		
 	}
 	
@@ -52,6 +53,15 @@ public class StateStack {
 			return stack[depth].getIntId();
 		}else
 			return -1;
+	}
+	
+	
+	/**
+	 * 取当前状态
+	 * @return
+	 */
+	public State getCurrentState() {
+		return stack[top];
 	}
 
 
