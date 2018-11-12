@@ -71,3 +71,175 @@
 	
 2018-11-09
 1.将测试过的状态转移/函数指针工程testFuncPointer中的有关类Func、FuncBase、StateTransfer加入到工程里来，工程本身尚未使用这些类
+
+2.去掉对图像、音频、连接等处理，统一在前面作为非文本消息回复无法处理
+3.将Const类的属性都改为static，使用中不再进行实例化
+4.修改
+	（1）将变量
+			state
+		改为
+			stepOfNewProj
+	（2）将
+			String respContent = "小牛处理请求异常，请稍候再试！";
+		改为
+			String respContent = "";
+		挪到try的外面
+	（3）在
+			catch (……)
+		下加入
+			respContent = "小牛处理请求异常，请稍候再试！";
+	（4）将变量
+			map
+		改为
+			mapProjInfo
+	（5）将
+			int idUser = db.insertNewUser(newUser);
+		改为
+			db.insertNewUser(newUser);
+			idUser  = newUser.getId_User();
+	（6）将插入状态栈首个状态的操作，改到取得用户idUser之后
+	（7）将变量
+			stack
+		改为
+			stateStack
+	（8）将
+			如果获取用户idUser成功，就记录到状态栈中
+			if (0 != idUser) {
+		改为
+			如果获取用户idUser成功，且状态栈为空，就记录到状态栈中
+			if (0 != idUser && stateStack.sizeof() == 0) {
+	（9）将
+			respContent = "无法处理您发送的非文本消息！";
+		改为
+			respContent += "无法处理您发送的非文本消息！";
+2018-11-11
+1.定义枚举类型状态类StateType，替换状态转移表中的String类型。
+	public enum StateType {
+		/**
+		 * 根据数据库整理各对象的层次关系
+		 * 属于用户的有Struct、Type、Project
+		 * 	属于Project的有Func、Var（全局变量）
+		 * 		属于Func的有FuncStatement
+		 * 		属于Func的有FuncVar（局部变量）
+		 * 		   属于FuncVar的有FuncVarItem
+		 * 		属于Var的有VarItem
+		 * 属于Struct的有StructItem
+		 * 		
+		 */
+		STUser,
+			STStruct,
+				STStructItem,
+			STType,
+			STProject,	
+				STFunc,
+					STFuncStatement,
+					STFuncVar,
+						STFuncVarItem,
+				STVar,
+					STVarItem,
+	}
+2.修改State类，增加一个stateType，说明这个状态属于那类，比如project就是一类。然后状态转移表以状态类组织，用户进入一个project。不管这个project具体是谁，都属于状态类TypeProject，根据这个状态类决定可以转到那个状态
+	private StateType stateType;//状态所属类型,并在构造函数中初始化
+3.在FuncBase中增加方法：
+	（1）list方法
+			public static State newItem(State state, String str1, String str2) {
+	（2）add方法
+			public static State add(State state, String str1, String str2) {
+	（3）del方法
+			public static State del(State state, String str1, String str2) {
+3.修改StateTranfer
+	（1）将
+				private HashMap<String, HashMap<String ,Func<State,String,String> > > stateMap = new HashMap<String ,HashMap<String ,Func<State,String,String> > >();
+		改为
+				private HashMap<StateType, HashMap<String ,Func<State,String,String> > > stateMap = new HashMap<StateType ,HashMap<String ,Func<State,String,String> > >();
+	（2）将原有用于测试的初始化状态转移表stateMap的操作全部注释掉
+	
+	（3）新增有关StateType.TUser状态出发的转移出口，包括cd/list/add/de
+			//2018-11-11
+			//新增StateType.STUser状态的转移出口cd（可进StateType.STProject，可进StateType.STVar，可进StateType.STFunc，可进StateType.STStruct，可进StateType.STType。根据第一个参数arg1决定进哪一类，根据第二个参数arg2决定进相应类的哪一个）
+			HashMap<String, Func<State,String,String> > transferMapSTUserCd = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTUserCd.put("cd", FuncBase::cd);
+			stateMap.put(StateType.STUser, transferMapSTUserCd);
+			
+			//2018-11-11
+			//新增StateType.STUser状态的转移出口list（可列出Struct、Project、Var、Func根据第一个参数arg1决定列出哪一类，状态不变）
+			HashMap<String, Func<State,String,String> > transferMapSTUserLs = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTUserLs.put("ls", FuncBase::ls);
+			stateMap.put(StateType.STUser, transferMapSTUserLs);
+			
+			//2018-11-11
+			//新增StateType.STUser状态的转移出口add（可新增Struct、Project、Var、Func根据第一个参数arg1决定列出哪一类，状态不变）
+			HashMap<String, Func<State,String,String> > transferMapSTUserAdd = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTUserAdd.put("add", FuncBase::add);
+			stateMap.put(StateType.STUser, transferMapSTUserAdd);
+			
+			//2018-11-11
+			//新增StateType.STUser状态的转移出口del（可删除Struct、Project、Var、Func根据第一个参数arg1决定列出哪一类，根据第二个参数arg2决定删除相应类的哪一个，状态不变）
+			HashMap<String, Func<State,String,String> > transferMapSTUserDel = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTUserDel.put("del", FuncBase::del);
+			stateMap.put(StateType.STUser, transferMapSTUserDel);
+	（4）新增有关从StateType.TProject状态出发可做的转移
+			//2018-11-11
+			//新增StateType.STProject状态的转移出口cd（可进StateType.STProject，可进StateType.STVar，可进StateType.STFunc，可进根据第一个参数arg1决定进哪一类，根据第二个参数arg2决定进相应类的哪一个）
+			HashMap<String, Func<State,String,String> > transferMapSTProjectCd = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTProjectCd.put("cd", FuncBase::cd);
+			stateMap.put(StateType.STProject, transferMapSTProjectCd);
+			
+			//2018-11-11
+			//新增StateType.STProject状态的转移出口list（可列出Project所属的Var、Func根据第一个参数arg1决定列出哪一类，状态不变）
+			HashMap<String, Func<State,String,String> > transferMapSTProjectLs = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTProjectLs.put("ls", FuncBase::ls);
+			stateMap.put(StateType.STProject, transferMapSTProjectLs);
+			
+			//2018-11-11
+			//新增StateType.STProject状态的转移出口add（可新增Var、Func根据第一个参数arg1决定列出哪一类，状态不变）
+			HashMap<String, Func<State,String,String> > transferMapSTProjectAdd = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTProjectAdd.put("add", FuncBase::add);
+			stateMap.put(StateType.STProject, transferMapSTProjectAdd);
+			
+			//2018-11-11
+			//新增StateType.STProject状态的转移出口del（可删除Var、Func根据第一个参数arg1决定列出哪一类，根据第二个参数arg2决定删除相应类的哪一个，状态不变）
+			HashMap<String, Func<State,String,String> > transferMapSTProjectDel = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTProjectDel.put("del", FuncBase::del);
+			stateMap.put(StateType.STProject, transferMapSTProjectDel);
+				
+			//2018-11-11
+			//新增StateType.STProject状态的转移出口dc（可退至StateType.STUser）
+			HashMap<String, Func<State,String,String> > transferMapSTProjectDc = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTProjectDc.put("dc", FuncBase::dc);
+			stateMap.put(StateType.STProject, transferMapSTProjectDc);
+	（5）初始化StateType.STFunc状态的转移出口,包括cd/dc/list/add/del
+			//2018-11-11
+			//新增StateType.STFunc状态的转移出口cd（可进StateType.STFunc，可进StateType.STVar，可进StateType.STFunc，可进根据第一个参数arg1决定进哪一类，根据第二个参数arg2决定进相应类的哪一个）
+			HashMap<String, Func<State,String,String> > transferMapSTFuncCd = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTFuncCd.put("cd", FuncBase::cd);
+			stateMap.put(StateType.STFunc, transferMapSTFuncCd);
+			
+			//2018-11-11
+			//新增StateType.STFunc状态的转移出口list（可列出Project所属的Var、Func根据第一个参数arg1决定列出哪一类，状态不变）
+			HashMap<String, Func<State,String,String> > transferMapSTFuncLs = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTFuncLs.put("ls", FuncBase::ls);
+			stateMap.put(StateType.STFunc, transferMapSTFuncLs);
+			
+			//2018-11-11
+			//新增StateType.STFunc状态的转移出口add（可新增Var、Func根据第一个参数arg1决定列出哪一类，状态不变）
+			HashMap<String, Func<State,String,String> > transferMapSTFuncAdd = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTFuncAdd.put("add", FuncBase::add);
+			stateMap.put(StateType.STFunc, transferMapSTFuncAdd);
+			
+			//2018-11-11
+			//新增StateType.STFunc状态的转移出口del（可删除Var、Func根据第一个参数arg1决定列出哪一类，根据第二个参数arg2决定删除相应类的哪一个，状态不变）
+			HashMap<String, Func<State,String,String> > transferMapSTFuncDel = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTFuncDel.put("del", FuncBase::del);
+			stateMap.put(StateType.STFunc, transferMapSTFuncDel);
+				
+			//2018-11-11
+			//新增StateType.STFunc状态的转移出口dc（可退至StateType.STUser）
+			HashMap<String, Func<State,String,String> > transferMapSTFuncDc = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTFuncDc.put("dc", FuncBase::dc);
+			stateMap.put(StateType.STFunc, transferMapSTFuncDc);
+	（7）初始化StateType.STFuncStatement状态的转移出口,包括dc/vi/more
+	
+			
+		
+	

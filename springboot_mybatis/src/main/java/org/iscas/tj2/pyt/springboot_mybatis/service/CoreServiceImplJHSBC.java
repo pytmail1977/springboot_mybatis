@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,33 +26,57 @@ import org.iscas.tj2.pyt.springboot_mybatis.util.MessageUtil;
 import org.iscas.tj2.pyt.springboot_mybatis.util.State;
 import org.iscas.tj2.pyt.springboot_mybatis.util.StateStack;
 import org.iscas.tj2.pyt.springboot_mybatis.util.TextMessageUtil;
+import org.iscas.tj2.pyt.springboot_mybatis.util.StateTransfer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
+
 @Service("JHSBC") //用于标注业务层组件
 public class CoreServiceImplJHSBC implements ICoreService {	
 	@Autowired
-    private TextMessageUtil textMessageUtil;	
-	private DbService db = new DbService();
-	Const projConst = new Const();
-	int state = 0; //0:正在浏览用户基本信息；1:用户在创建
-	int idOldUser = 0;
+    private TextMessageUtil textMessageUtil;
 	
-	//TODO
-	//状态深度暂时设为10，下一步要改为常数
-	StateStack stack = new StateStack(projConst.maxStackDepth);
+	//数据库操作对象
+	private DbService db = new DbService();
+	//新建工程的步骤
+	int stepOfNewProj = 0; //0:未进入创建流程；1、2、3、4:用户在创建
+	
+	//状态转移对象
+	StateTransfer stateTransfer = null;	
+	//初始化状态栈
+	StateStack stateStack = new StateStack(Const.maxStackDepth);
+	//存放定义新工程所用的信息
+	Map<String, String> mapProjInfo = new HashMap<String, String>();
+	
+	//debug用变量
+	//人机交互轮数
+	int round = 0;
+	
+	public void StateProccedue(String reqContent) {
+		System.out.println("Current state is: "+stateTransfer.getNowState().getStrComment());
+		//System.out.println("Please Input your order:");
 
-	Map<String, String> map = new HashMap<String, String>();
+		String[] strArray = reqContent.split(" ");
+		String strOrder = strArray[0];
+		String strArg1 = strArray[1];
+		String strArg2 = strArray[2];
+		
+		if("dc" == strOrder) {
+			
+		}		
+		stateTransfer.transferState(strOrder, strArg1, strArg2);
+	}
 	
 	@Override
 	public String processRequest(HttpServletRequest request) {
 		// TODO Auto-generated method stub
 		String respMessage = null;
+		// 初始化返回的文本消息内容
+		String respContent = "";
 		try {
-			// 默认返回的文本消息内容
-			String respContent = "小牛处理请求异常，请稍候再试！";
 			// xml请求解析
 			Map<String, String> requestMap = MessageUtil.parseXml(request);
 			// 发送方帐号（open_id）
@@ -61,34 +86,38 @@ public class CoreServiceImplJHSBC implements ICoreService {
 			// 消息类型
 			String msgType = requestMap.get("MsgType");
 
-			//从数据库查询用户信息，记录Id_User，如果没有结果就插入一条记录。
-    		System.out.println("从数据库查询用户信息：");
+			//输出是第几轮交互
+    		System.out.println("第"+(round++)+"轮交互：");
+    		
+    		//从数据库查询用户信息
         	User user = null;
         	user = db.getUserInfo(fromUserName);
-        	//如果没有结果就插入一条记录。
+        	int idUser = 0;
+        	//如果没有查到就插入一条用户记录
         	if (null == user) {
         		User newUser = new User();
         		newUser.setWeixinId_User(fromUserName);
-        		int idUser = db.insertNewUser(newUser);
-        		//如果插入新用户成功，就记录到状态栈中
-        		if (0 != idUser) {
-        			State state = new State(idUser,fromUserName,0,"用户:"+fromUserName);
-        			stack.push(state);
-        			idOldUser = idUser;
-        		}
+        		//int idUser = db.insertNewUser(newUser);
+        		db.insertNewUser(newUser);        		
+        		idUser  = newUser.getId_User();
         		
         	}else{//如果查询到就记录到状态栈中
-        		int idUser = user.getId_User();
-    			State state = new State(idUser,fromUserName,0,"用户:"+fromUserName);
-    			stack.push(state);
-    			idOldUser = idUser;
-    			
+        		idUser = user.getId_User();    			
         	}//if (null == user) 
-        	
+
+        	//如果查询idUser错误，或新增用户失败则返回
+        	if(0 == idUser)
+        		return "新增用户失败";
+        	     	
+    		//获取用户idUser成功后，如果是首次登录（状态栈为空），就记录到状态栈中,
+    		if (stateStack.sizeof() == 0) {
+    			State state = new State(idUser,fromUserName,0,"用户:"+fromUserName);
+    			stateStack.push(state);
+    		}
+        	        	
         	//在返回语开头加上下文信息
-        	respContent = stack.getContext();
-        	
-			
+        	respContent = stateStack.getContext();
+        				
 			// 回复文本消息，注意此处TextMessage是在包org.iscas.tj2.pyt.springboot_mybatis.model.message.resp.TextMessage中定义的
 			TextMessage textMessage = new TextMessage();
 			textMessage.setToUserName(fromUserName);
@@ -101,206 +130,185 @@ public class CoreServiceImplJHSBC implements ICoreService {
 			// 接收文本消息内容
 			String reqContent = requestMap.get("Content");
 			
-			// 根据收到的信息种类自动回复消息
-			// 如果是文本则回复文本消息
-			if (msgType.equals(MessageUtil.REQ_MESSAGE_TYPE_TEXT)) {
-                //如果用户发送表情，则回复同样表情。
-                if (isQqFace(reqContent)) {
-                    respContent = reqContent;
+			// 根据收到的信息种类自动回复消息			
+			// 如果不是文本则回复……
+			//去掉对图像、音频、连接等处理，统一在前面作为非文本消息回复无法处理
+			if (!msgType.equals(MessageUtil.REQ_MESSAGE_TYPE_TEXT)) {
+	            respContent += "无法处理您发送的非文本消息！";
+	            textMessage.setContent(respContent);
+	            // 将文本消息对象转换成xml字符串
+	            respMessage = textMessageUtil.messageToxml(textMessage);	
+	            return respMessage;
+			}
+				
+            //如果用户发送表情，则回复同样表情。
+            if (isQqFace(reqContent)) {
+                respContent += reqContent;
+                textMessage.setContent(respContent);
+                // 将文本消息对象转换成xml字符串
+                respMessage = textMessageUtil.messageToxml(textMessage);
+                return respMessage;
+            } 
+			// 如果是其它文本则进一步处理
+        	
+            switch (reqContent) {
+                case "1#": {
+                    StringBuffer buffer = new StringBuffer();
+                    buffer.append("您好，我是小牛，请回复数字选择服务：").append("\n\n");
+                    buffer.append("11# 可查看软件定义卫星技术联盟网址").append("\n");
+                    buffer.append("12# 可查看用户信息").append("\n");
+                    buffer.append("13# 可查看用户的工程").append("\n");
+                    buffer.append("14# 可创建新的工程").append("\n");
+                    buffer.append("cd 工程id 可进入相应工程").append("\n");
+                    buffer.append("任何时刻回复“1#”退回到此菜单").append("\n");
+                    //TODO 状态栈的退回
+                    respContent = String.valueOf(buffer);
+                    System.out.println(respContent);
+                    textMessage.setContent(respContent);
+                    respMessage = textMessageUtil.messageToxml(textMessage);
+                    break;
+                }
+
+                case "11#": {
+                    //测试网址回复                	
+                    respContent = "<a href=\"http://www.sdsalliance.net\">软件定义卫星技术联盟</a>";
+                    System.out.println(respContent);
                     textMessage.setContent(respContent);
                     // 将文本消息对象转换成xml字符串
                     respMessage = textMessageUtil.messageToxml(textMessage);
-                } else {
-                    //回复固定消息
-/*                	switch(stack.getCurrentState().getStrTable()) {
-                	case projConst.tablename_User:
-                		break;
-                		default:
-                			break;
-                	}*/
-                	
-                    switch (reqContent) {
-                        case "1#": {
-                            StringBuffer buffer = new StringBuffer();
-                            buffer.append("您好，我是小牛，请回复数字选择服务：").append("\n\n");
-                            buffer.append("11# 可查看软件定义卫星技术联盟网址").append("\n");
-                            buffer.append("12# 可查看用户信息").append("\n");
-                            buffer.append("13# 可查看用户的工程").append("\n");
-                            buffer.append("14# 可创建新的工程").append("\n");
-                            buffer.append("回复“1#”显示此帮助菜单").append("\n");
-                            respContent = String.valueOf(buffer);
-                            System.out.println(respContent);
-                            textMessage.setContent(respContent);
-                            respMessage = textMessageUtil.messageToxml(textMessage);
-                            break;
-                        }
+                    break;
+                }
+                
+                case "12#": {
+                    //反馈用户信息
+            		String strContent = "用户信息:\n" + "微信Id:"+ user.getWeixinId_User() +  "; 帐号:" + user.getAccount_User() + "; 用户姓名:" + user.getName_User() + "; email:" + user.getEmail_User();
+            		System.out.println(strContent);
+                    textMessage.setContent(strContent);
+                    // 将文本消息对象转换成xml字符串
+                    respMessage = textMessageUtil.messageToxml(textMessage);
+                    break;
+                }
+                case "13#": {                	
+					// 反馈用户的工程信息
+					System.out.println("从数据库查询用户的工程信息：");
+					List<Project> projects = db.getProjectsInfo(fromUserName);
+					String strContent = "您的工程:";
+					Iterator <Project> iter= projects.iterator();
+					int i=0;
+					while(iter.hasNext()) {
+						i++;
+						strContent += "\n工程"+i+":\n";
+						Project proj = iter.next();
+						strContent += "工程id:" + proj.getIdProject() + "; 工程名:"+proj.getNameProject() + "; 工程版本:" + proj.getVersionProject();
+					}
 
-                        case "11#": {
-                            //测试网址回复
-                        	
-                            respContent = "<a href=\"http://www.sdsalliance.net\">软件定义卫星技术联盟</a>";
-                            System.out.println(respContent);
-                            textMessage.setContent(respContent);
-                            // 将文本消息对象转换成xml字符串
-                            respMessage = textMessageUtil.messageToxml(textMessage);
-                            break;
-                        }
-                        
-                        case "12#": {
-                            //反馈用户信息
-                    		String strContent = "用户信息:\n" + "微信Id:"+ user.getWeixinId_User() +  "; 帐号:" + user.getAccount_User() + "; 用户姓名:" + user.getName_User() + "; email:" + user.getEmail_User();
-                    		System.out.println(strContent);
-                            textMessage.setContent(strContent);
-                            // 将文本消息对象转换成xml字符串
-                            respMessage = textMessageUtil.messageToxml(textMessage);
-                            break;
-                        }
-                        case "13#": {
-                        	
-    						// 反馈用户的工程信息
-    						System.out.println("从数据库查询用户的工程信息：");
-    						List<Project> projects = db.getProjectsInfo(fromUserName);
-    						String strContent = "您的工程:";
-    						Iterator <Project> iter= projects.iterator();
-    						int i=0;
-    						while(iter.hasNext()) {
-    							i++;
-    							strContent += "\n工程"+i+":\n";
-    							Project proj = iter.next();
-    							strContent += "工程id:" + proj.getIdProject() + "; 工程名:"+proj.getNameProject() + "; 工程版本:" + proj.getVersionProject();
-    						}
+					System.out.println(strContent);
+					textMessage.setContent(strContent);
+					// 将文本消息对象转换成xml字符串
+					respMessage = textMessageUtil.messageToxml(textMessage);					
+					break;
 
-    						System.out.println(strContent);
-    						textMessage.setContent(strContent);
-    						// 将文本消息对象转换成xml字符串
-    						respMessage = textMessageUtil.messageToxml(textMessage);
-    						
-    						break;
-
-                        }
-                        case "14#": {
-                            //创建工程
-                        	state = 1;
-                        	//System.out.println("请输入工程名");
-                        	
-                        	respContent = "请输入工程名";
-                        	System.out.println(respContent);
-                        	textMessage.setContent(respContent);
-                        	respMessage = textMessageUtil.messageToxml(textMessage);
-                            break;
-                        }
-                        default: {
-                        	switch (state){
-                        		case 1:
-                        			map.put("NameProject", reqContent);
-                            		state = 2;
-                            		respContent = "输入工程版本：";
-                            		System.out.println(respContent);
-                            		textMessage.setContent(respContent);
-                            		respMessage = textMessageUtil.messageToxml(textMessage);
-                            		break;
-                        		case 2:
-                        			map.put("VersionProject", reqContent);
-                            		state = 3;
-                            		respContent = "输入工程注释：";
-                            		System.out.println(respContent);
-                            		textMessage.setContent(respContent);
-                            		respMessage = textMessageUtil.messageToxml(textMessage);
-                            		break;
-                        		case 3:
-                        			map.put("MemoProject", reqContent);
-                            		state = 4;
-                            		respContent = "此工程是否开源（n:否，1:y）：";
-                            		System.out.println(respContent);
-                            		textMessage.setContent(respContent);
-                            		respMessage = textMessageUtil.messageToxml(textMessage);
-                            		break;
-                        		case 4:
-                        			if("y" == reqContent || "Y" == reqContent) {
-                        				map.put("OpenSource","1");
-                        			}else if("n" == reqContent || "N" == reqContent) {
-                        				map.put("OpenSource", "0");
-                        			}
-                                	Project proj = new Project();
-                                	proj.setNameProject(map.get("NameProject"));
-                                	proj.setMemoProject(map.get("MemoProject"));
-                                	//proj.setOpensourceProject(Integer.parseInt(map.get("OpenSource")));
-                                	proj.setVersionProject(map.get("VerstionProject"));
-                                	int ret = db.createProject(idOldUser,proj);
-                                	if (0 == ret) {
-                                		respContent = "工程已成功创建";            		
-                                	}else {
-                                		respContent = "工程创建失败";
-                                		switch (ret) {
-                                		case -1: 
-                                			respContent += ":insert Project失败";
-                                			break;
-                                		case -2:
-                                			respContent += ":insert Permission失败";
-                                			break;
-                                		case -3:
-                                			respContent += ":insert Role失败";
-                                			break;
-                                		case -4:
-                                			respContent += ":insert RolePRMSRelation失败";
-                                			break;
-                                		case -5:
-                                			respContent += ":insert UserRoleRelation失败";
-                                			break;
-                                		default:
-                                			break;
-                                		}//switch(ret)
-                                		                                		
-                                	}//if (0 == ret){...else
-                                	
-                                	System.out.println(respContent);
-                                    textMessage.setContent(respContent);
-                                    // 将文本消息对象转换成xml字符串
-                                    respMessage = textMessageUtil.messageToxml(textMessage);
-                                    state = 0;
-                                    break;
+                }
+                case "14#": {
+                    //创建工程
+                	stepOfNewProj = 1;
+                	respContent = "请输入工程名";
+                	System.out.println(respContent);
+                	textMessage.setContent(respContent);
+                	respMessage = textMessageUtil.messageToxml(textMessage);
+                    break;
+                }
+                default: {
+                	switch (stepOfNewProj){                	
+                		case 0:
+                			//进入状态机处理
+                    		respContent = "";
+                    		System.out.println(respContent);
+                    		textMessage.setContent(respContent);
+                    		respMessage = textMessageUtil.messageToxml(textMessage);
+                    		break;
+                    	//其余情况进入工程创建流程
+                		case 1:
+                			//进入新建工程第1步
+                			mapProjInfo.put("NameProject", reqContent);
+                    		stepOfNewProj = 2;
+                    		respContent = "输入工程版本：";
+                    		System.out.println(respContent);
+                    		textMessage.setContent(respContent);
+                    		respMessage = textMessageUtil.messageToxml(textMessage);
+                    		break;
+                		case 2:
+                			mapProjInfo.put("VersionProject", reqContent);
+                    		stepOfNewProj = 3;
+                    		respContent = "输入工程注释：";
+                    		System.out.println(respContent);
+                    		textMessage.setContent(respContent);
+                    		respMessage = textMessageUtil.messageToxml(textMessage);
+                    		break;
+                		case 3:
+                			mapProjInfo.put("MemoProject", reqContent);
+                    		stepOfNewProj = 4;
+                    		respContent = "此工程是否开源（n:否，1:y）：";
+                    		System.out.println(respContent);
+                    		textMessage.setContent(respContent);
+                    		respMessage = textMessageUtil.messageToxml(textMessage);
+                    		break;
+                		case 4:
+                			if("y" == reqContent || "Y" == reqContent) {
+                				mapProjInfo.put("OpenSource","1");
+                			}else if("n" == reqContent || "N" == reqContent) {
+                				mapProjInfo.put("OpenSource", "0");
+                			}
+                        	Project proj = new Project();
+                        	proj.setNameProject(mapProjInfo.get("NameProject"));
+                        	proj.setMemoProject(mapProjInfo.get("MemoProject"));
+                        	//proj.setOpensourceProject(Integer.parseInt(mapProjInfo.get("OpenSource")));
+                        	proj.setVersionProject(mapProjInfo.get("VerstionProject"));
+                        	int ret = db.createProject(idUser,proj);
+                        	if (0 == ret) {
+                        		respContent = "工程已成功创建";            		
+                        	}else {
+                        		respContent = "工程创建失败";
+                        		switch (ret) {
+                        		case -1: 
+                        			respContent += ":insert Project失败";
+                        			break;
+                        		case -2:
+                        			respContent += ":insert Permission失败";
+                        			break;
+                        		case -3:
+                        			respContent += ":insert Role失败";
+                        			break;
+                        		case -4:
+                        			respContent += ":insert RolePRMSRelation失败";
+                        			break;
+                        		case -5:
+                        			respContent += ":insert UserRoleRelation失败";
+                        			break;
                         		default:
-                                    respContent = "很抱歉，小牛不理解你说的话。\n\n回复“1#”显示帮助信息";
-                                    textMessage.setContent(respContent);
-                                    // 将文本消息对象转换成xml字符串
-                                    respMessage = textMessageUtil.messageToxml(textMessage);
-                                    break;
-                              }//switch (state){
-                        }//default:
-                    }//switch (reqContent) {
-                }//if (isQqFace(reqContent)) {...else {
-			}//if (msgType.equals(MessageUtil.REQ_MESSAGE_TYPE_TEXT)) {
+                        			break;
+                        		}//switch(ret)                        		                                		
+                        	}//if (0 == ret){...else                        	
+                        	System.out.println(respContent);
+                            textMessage.setContent(respContent);
+                            // 将文本消息对象转换成xml字符串
+                            respMessage = textMessageUtil.messageToxml(textMessage);
+                            stepOfNewProj = 0;
+                            break;
+                		default:
+                            respContent = "很抱歉，小牛无法处理你的命令。\n\n回复“1#”显示帮助信息";
+                            textMessage.setContent(respContent);
+                            // 将文本消息对象转换成xml字符串
+                            respMessage = textMessageUtil.messageToxml(textMessage);
+                            break;
+                      }//switch (stepOfNewProj){
+                }//default:
+            }//switch (reqContent) {
 
-	        // 图片消息
-	        else if (msgType.equals(MessageUtil.REQ_MESSAGE_TYPE_IMAGE)) {
-	            respContent = "无法处理您发送的图片消息！";
-	            textMessage.setContent(respContent);
-	            // 将文本消息对象转换成xml字符串
-	            respMessage = textMessageUtil.messageToxml(textMessage);
-	        }
-	        // 地理位置消息
-	        else if (msgType.equals(MessageUtil.REQ_MESSAGE_TYPE_LOCATION)) {
-	            respContent = "无法处理您发送的地理位置消息！";
-	            textMessage.setContent(respContent);
-	            // 将文本消息对象转换成xml字符串
-	            respMessage = textMessageUtil.messageToxml(textMessage);
-	        }
-	        // 链接消息
-	        else if (msgType.equals(MessageUtil.REQ_MESSAGE_TYPE_LINK)) {
-	            respContent = "无法处理您发送的链接消息！";textMessage.setContent(respContent);
-	            // 将文本消息对象转换成xml字符串
-	            respMessage = textMessageUtil.messageToxml(textMessage);
 
-	        }
-	        // 音频消息
-	        else if (msgType.equals(MessageUtil.REQ_MESSAGE_TYPE_VOICE)) {
-	            respContent = "无法处理您发送的音频消息！";
-	            textMessage.setContent(respContent);
-	            // 将文本消息对象转换成xml字符串
-	            respMessage = textMessageUtil.messageToxml(textMessage);
-	        }
 	    } catch (Exception e) {
 	        e.printStackTrace();
+	        respContent = "小牛处理请求异常，请稍候再试！";
 	    }
 
 	        return respMessage;
