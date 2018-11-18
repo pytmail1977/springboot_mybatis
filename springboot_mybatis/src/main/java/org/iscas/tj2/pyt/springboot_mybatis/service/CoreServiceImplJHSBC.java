@@ -17,6 +17,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.iscas.tj2.pyt.springboot_mybatis.Const;
+import org.iscas.tj2.pyt.springboot_mybatis.SceneType;
 import org.iscas.tj2.pyt.springboot_mybatis.controller.LoginController;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.UserMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Project;
@@ -55,19 +56,20 @@ public class CoreServiceImplJHSBC implements ICoreService {
 	//人机交互轮数
 	int round = 0;
 	
-	public void StateProccedue(String reqContent) {
+	//2018-11-17 传入reqContent参数给transferState
+	//2018-11-17 将返回值由void改为String
+	public String StateProccedue(String reqContent) {
 		System.out.println("Current state is: "+stateTransfer.getNowState().getStrComment());
 		//System.out.println("Please Input your order:");
 
 		String[] strArray = reqContent.split(" ");
 		String strOrder = strArray[0];
-		String strArg1 = strArray[1];
-		String strArg2 = strArray[2];
+		String strArg1 = (strArray.length>1?strArray[1]:null);
+		String strArg2 = (strArray.length>2?strArray[2]:null);
 		
-		if("dc" == strOrder) {
-			
-		}		
-		stateTransfer.transferState(strOrder, strArg1, strArg2);
+		stateTransfer.transferState(reqContent,strOrder, strArg1, strArg2);
+		String strReturn = stateTransfer.getNowState().getRespContent();
+		return strReturn;
 	}
 	
 	@Override
@@ -109,10 +111,13 @@ public class CoreServiceImplJHSBC implements ICoreService {
         	if(0 == idUser)
         		return "新增用户失败";
         	     	
-    		//获取用户idUser成功后，如果是首次登录（状态栈为空），就记录到状态栈中,
+    		//获取用户idUser成功后，如果是首次登录（状态栈为空），就记录到状态栈中，并用该状态初始化stateTransfer
     		if (stateStack.sizeof() == 0) {
-    			State state = new State(idUser,fromUserName,0,"用户:"+fromUserName);
+    			State state = new State(idUser,fromUserName,0,"用户:"+fromUserName,SceneType.STUser);
     			stateStack.push(state);
+    			
+    			stateTransfer = new StateTransfer(state);
+    			
     		}
         	        	
         	//在返回语开头加上下文信息
@@ -222,7 +227,8 @@ public class CoreServiceImplJHSBC implements ICoreService {
                 	switch (stepOfNewProj){                	
                 		case 0:
                 			//进入状态机处理
-                    		respContent = "";
+                    		//respContent = "";
+                			respContent = StateProccedue(reqContent);
                     		System.out.println(respContent);
                     		textMessage.setContent(respContent);
                     		respMessage = textMessageUtil.messageToxml(textMessage);

@@ -143,7 +143,8 @@
 3.在FuncBase中增加方法：
 	（1）list方法
 			public static State newItem(State state, String str1, String str2) {
-	（2）add方法
+	（2）
+ 方法
 			public static State add(State state, String str1, String str2) {
 	（3）del方法
 			public static State del(State state, String str1, String str2) {
@@ -239,7 +240,200 @@
 			transferMapSTFuncDc.put("dc", FuncBase::dc);
 			stateMap.put(StateType.STFunc, transferMapSTFuncDc);
 	（7）初始化StateType.STFuncStatement状态的转移出口,包括dc/vi/more
-	
+			//2018-11-11
+			//新增SceneType.STFuncStatement状态的转移出口vi（可编辑当前行、Func根据第一个参数arg1决定此行的新内容，状态不变）
+			HashMap<String, Func<State,String,String> > transferMapSTFuncStatementVi = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTFuncStatementVi.put("vi", FuncBase::vi);
+			stateMap.put(SceneType.STFuncStatement, transferMapSTFuncStatementVi);
 			
-		
+			//2018-11-11
+			//新增SceneType.STFuncStatement状态的转移出口more（可显示当前行，状态不变）
+			HashMap<String, Func<State,String,String> > transferMapSTFuncStatementMore = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTFuncStatementMore.put("more", FuncBase::more);
+			stateMap.put(SceneType.STFuncStatement, transferMapSTFuncStatementMore);
+			
+			//2018-11-11
+			//新增SceneType.STFuncStatement状态的转移出口dc（可退至SceneType.STUser）
+			HashMap<String, Func<State,String,String> > transferMapSTFuncStatementDc = new HashMap<String, Func<State,String,String>>();   
+			transferMapSTFuncStatementDc.put("dc", FuncBase::dc);
+			stateMap.put(SceneType.STFuncStatement, transferMapSTFuncStatementDc);		
+			
+2018-11-12
+1.将枚举类型StateType修改为SceneType
+2.备份StateTransfer.java，完全清空其中初始化状态转移表的内容。
+
+2018-11-17
+1.在枚举类型定义中，增加注释信息
+	STUser, //help,pwd,attr,lsp,lst,lss,cdp,cdt,cds,addp,addt,adds,delp,delt,dels
+		STStruct,//help,pwd,attr,lssi(ls),cdsi(cd),addsi(add),delsi(del),dc
+			STStructItem,//help,pwd,attr,dc
+		STType,//help,pwd,attr,dc
+		STProject,	//help,pwd,attr,lsf,lsv,cdf,cdv,addf,addv,delf,delv,dc
+			STFunc, //help,pwd,attr,lsfs,lsfv,cdfs,cdfv,addfs,addfv,delfs,delfv,dc
+				STFuncStatement,//help,pwd,attr,dc
+				STFuncVar,//help,pwd,attr,lsfvi(ls),cdfvi(cd),addfvi(add),delfvi(del),dc
+					STFuncVarItem,//help,pwd,attr,dc
+			STVar,//help,pwd,attr,lsvi(ls),cdvi(cd),addvi(add),delvi(del),dc
+				STVarItem,//help,pwd,attr,dc
+2.修改Const.java，
+	(1)新增各场景下的help信息字符串
+	public static final String STUser_HELP = "可用的命令：\n"
+			+ "help-列出此帮助信息\n"
+			+ "pwd-显示当前所处的场景\n"
+			+ "whoami-显示当前操作的对象\n"
+			+ "attr key value-修改当前对象的属性\n"
+			+ "lsp-列出所有project\n"
+			+ "lst-列出所有type\n"
+			+ "lss-列出所有struct\n"
+			+ "cdp id/name-进入指定的project\n"
+			+ "cdt id/name-进入指定的type\n"
+			+ "cds id/name-进入指定的struct\n"
+			+ "addp name-新增一个project\n"
+			+ "addt name-新增一个type\n"
+			+ "adds name-新增一个struct\n"
+			+ "delp id-删除一个project\n"
+			+ "delt id-删除一个type\n"
+			+ "dels id-删除一个struct";
+	public static final String STStruct_HELP = "可用的命令：\n"
+			+ "help-列出此帮助信息\n"
+			+ "pwd-显示当前所处的场景\n"
+			+ "whoami-显示当前操作的对象\n"
+			+ "attr key value-修改当前对象的属性\n"
+			+ "lssi(ls)-列出struct item\n"
+			+ "cdsi(cd) id-进入struct item\n"
+			+ "addsi(add) type name-新增struct item\n"
+			+ "delsi(del) id-删除struct item\n"
+			+ "dc-退回到上一层";
+		public static final String STStructItem_HELP = "可用的命令：\n"
+				+ "help-列出此帮助信息\n"
+				+ "pwd-显示当前所处的场景\n"
+				+ "whoami-显示当前操作的对象\n"
+				+ "attr key value-修改当前对象的属性\n"
+				+ "dc-退回到上一层";
+	public static final String STType_HELP = "可用的命令：\n"
+			+ "help-列出此帮助信息\n"
+			+ "pwd-显示当前所处的场景\n"
+			+ "whoami-显示当前操作的对象\n"
+			+ "attr key value-修改当前对象的属性\n"
+			+ "dc-退回到上一层";
+	public static final String STProject_HELP = "可用的命令：\n"
+			+ "help-列出此帮助信息\n"
+			+ "pwd-显示当前所处的场景\n"
+			+ "whoami-显示当前操作的对象\n"
+			+ "attr key value-修改当前对象的属性\n"
+			+ "lsf-列出function\n"
+			+ "lsv-列出全局变量var\n"
+			+ "cdf id/name-进入function\n"
+			+ "cdv id/name-进入var\n"
+			+ "addf name-新增function\n"
+			+ "addv name-新增var\n"
+			+ "delf id-删除function\n"
+			+ "delv id-删除var\n"
+			+ "dc-退回到上一层";
+		public static final String STFunc_HELP = "可用的命令：\n"
+				+ "help-列出此帮助信息\n"
+				+ "pwd-显示当前所处的场景\n"
+				+ "whoami-显示当前操作的对象\n"
+				+ "attr key value-修改当前对象的属性\n"
+				+ "lsfs-列出函数语句function statement\n"
+				+ "lsfv-列出函数局部变量fuction var\n"
+				+ "cdfs id-进入指定的函数语句function statement\n"
+				+ "cdfv id-进入指定的函数局部变量fuction var\n"
+				+ "addfs content\n-增加一条函数语句function statement"
+				+ "addfv name-增加一个函数局部变量fuction var\n"
+				+ "delfs id-删除一条函数语句function statement\n"
+				+ "delfv id-删除一个函数局部变量fuction var\n"
+				+ "dc-退回到上一层";
+			public static final String STFuncStatement_HELP = "可用的命令：\n"
+					+ "help-列出此帮助信息\n"
+					+ "pwd-显示当前所处的场景\n"
+					+ "whoami-显示当前操作的对象\n"
+					+ "attr key value-修改当前对象的属性\n"
+					+ "dc-退回到上一层";
+			public static final String STFuncVar_HELP = "可用的命令：\n"
+					+ "help-列出此帮助信息\n"
+					+ "pwd-显示当前所处的场景\n"
+					+ "whoami-显示当前操作的对象\n"
+					+ "attr key value-修改当前对象的属性\n"
+					+ "lsfvi(ls)-列出函数局部变量字段Function Var Item\n"
+					+ "cdfvi(cd)-进入函数局部变量字段Function Var Item\n"
+					+ "addfvi(add)-新增函数局部变量字段Function Var Item\n"
+					+ "delfvi(del)-删除函数局部变量字段Function Var Item\n"
+					+ "dc-退回到上一层";
+				public static final String STFuncVarItem_HELP = "可用的命令：\n"
+						+ "help-列出此帮助信息\n"
+						+ "pwd-显示当前所处的场景\n"
+						+ "whoami-显示当前操作的对象\n"
+						+ "attr key value-修改当前对象的属性\n"
+						+ "dc-退回到上一层";
+		public static final String STVar_HELP = "可用的命令：\n"
+				+ "help-列出此帮助信息\n"
+				+ "pwd-显示当前所处的场景\n"
+				+ "whoami-显示当前操作的对象\n"
+				+ "attr key value-修改当前对象的属性\n"
+				+ "lsvi(ls)-列出全局变量字段Var Item\n"
+				+ "cdvi(cd)-进入全局变量字段Var Item\n"
+				+ "addvi(add)-新增全局变量字段Var Item\n"
+				+ "delvi(del)-删除全局变量字段Var Item\n"
+				+ "dc-退回到上一层";
+			public static final String STVarItem_HELP = "可用的命令：\n"
+					+ "help-列出此帮助信息\n"
+					+ "pwd-显示当前所处的场景\n"
+					+ "whoami-显示当前操作的对象\n"
+					+ "attr key value-修改当前对象的属性\n"
+					+ "dc-退回到上一层";
+	(2)	新增一个map，用于查询在不同的场景下应当显示什么帮助内容
+	public static final Map<SceneType, String> mapHelpInfo = new HashMap<SceneType, String>(){{
+			put(SceneType.STUser, STUser_HELP);
+			put(SceneType.STStruct, STStruct_HELP);
+			put(SceneType.STStructItem, STStructItem_HELP);
+			put(SceneType.STType, STType_HELP);
+			put(SceneType.STProject, STProject_HELP);
+			put(SceneType.STFunc, STFunc_HELP);
+			put(SceneType.STFuncStatement, STFuncStatement_HELP);
+			put(SceneType.STFuncVar, STFuncVar_HELP);
+			put(SceneType.STFuncVarItem, STFuncVarItem_HELP);
+			put(SceneType.STVar, STVar_HELP);
+			put(SceneType.STVarItem, STVarItem_HELP);
+	}};
 	
+2.修改State类的定义，增加两项，分别是最近的用户输入，和最近给用户的输出。
+	private String reqContent;
+	private String respContent;
+3.修改StateTransfer类
+	（1）修改transferState()函数，在参数中，增加一项String reqContent，在调用
+			nextState = func.apply(nowState,strArg1, strArg2);
+		之前，增加对nowState的reqContent属性的设置
+			nowState.setReqContent(reqContent);
+	（2）注释掉构造函数public StateTransfer(State nowState)中2018-11-12和2018-11-11新增的所有内容
+	（3）新增一个状态转移help
+4.修改CoreServiceImplJHSBC
+	（1）修改调用transferState（）函数的函数CoreServiceImp.StateProccedue()，传入reqContent参数
+	（2）修改注释“进入状态机处理”处的代码，增加对StateProccedue的调用
+4.修改FuncBase
+	（1）将原有函数全部注释掉
+	（2）根据场景枚举类型SeceneType中的注释，进行函数定义
+	（3）并将attr、pwd、help、dc、whoami五个函数作为统一定义的函数
+	（4）完成help函数，根据当前状态所属场景从Const类的mapHelpInfo中查找对应的help字符串，设置到当前状态state的的respContent中
+
+2018-11-18
+1.将StateService.java移入bk目录
+2.修改CoreServiceImplJHSBC.java
+	（1）进行stateTransfer的初始化，将
+			//获取用户idUser成功后，如果是首次登录（状态栈为空），就记录到状态栈中,
+    		if (stateStack.sizeof() == 0) {
+    			State state = new State(idUser,fromUserName,0,"用户:"+fromUserName,SceneType.STUser);
+    			stateStack.push(state);
+    （2）将StateProccedue（）中的
+    	    String strArg1 = strArray[1];
+			String strArg2 = strArray[2];
+    	改为
+    		String strArg1 = (strArray.length>1?strArray[1]:null);
+			String strArg2 = (strArray.length>2?strArray[2]:null);
+3.修改StateTransfer.java
+	（1）将transferState（）中的
+		Func<State,String,String> func = stateMap.get(this.nowState).get(strOrder);
+		改为
+		Func<State,String,String> func = stateMap.get(this.nowState.getSceneType()).get(strOrder);  			
+    		}
+		改为

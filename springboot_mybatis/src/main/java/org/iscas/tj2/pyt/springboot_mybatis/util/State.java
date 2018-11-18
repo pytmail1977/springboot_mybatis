@@ -1,6 +1,6 @@
 package org.iscas.tj2.pyt.springboot_mybatis.util;
 
-import org.iscas.tj2.pyt.springboot_mybatis.StateType;
+import org.iscas.tj2.pyt.springboot_mybatis.SceneType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class State {
@@ -9,7 +9,11 @@ public class State {
 	private int intId; //在相关表中的id
 	private String strComment; //上下文描述
 	private int intDepth; //上下文深度
-	private StateType stateType;//状态所属类型，需在构造函数中初始化
+	private SceneType sceneType;//状态所属类型，需在构造函数中初始化
+	
+	//增加两项，分别是最近的用户输入，和最近给用户的输出
+	private String reqContent;
+	private String respContent;
 	
 	/**
 	 * 构造函数
@@ -18,12 +22,12 @@ public class State {
 	 * @param intDepth
 	 * @param strComment
 	 */
-	public State(int intId, String strTable,int intDepth, String strComment,StateType stateType) {
+	public State(int intId, String strTable,int intDepth, String strComment,SceneType sceneType) {
 		this.intId = intId;
 		this.strTable = strTable;
 		this.intDepth = intDepth;
 		this.strComment = strComment;
-		this.stateType = stateType;
+		this.sceneType = sceneType;
 	}
 
 	public String getStrTable() {
@@ -58,12 +62,30 @@ public class State {
 		this.intDepth = intDepth;
 	}
 
-	public StateType getStateType() {
-		return stateType;
+	public SceneType getSceneType() {
+		return sceneType;
 	}
 
-	public void setStateType(StateType stateType) {
-		this.stateType = stateType;
+	public void setSceneType(SceneType sceneType) {
+		this.sceneType = sceneType;
+	}
+
+
+
+	public String getRespContent() {
+		return respContent;
+	}
+
+	public void setRespContent(String respContent) {
+		this.respContent = respContent;
+	}
+
+	public String getReqContent() {
+		return reqContent;
+	}
+
+	public void setReqContent(String reqContent) {
+		this.reqContent = reqContent;
 	}
 	
 }
