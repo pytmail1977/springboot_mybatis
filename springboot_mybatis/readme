@@ -436,4 +436,99 @@
 		改为
 		Func<State,String,String> func = stateMap.get(this.nowState.getSceneType()).get(strOrder);  			
     		}
+
+#commit #
+
+2018-11-18
+1.修改Func.java
+	将
+		public State apply(S s, T1 t1, T2 t2);
+	改为
+		public String apply(S s, T1 t1, T2 t2);
+2.修改FuncBase.java
+	将处理函数的形式由
+		public static State del(State state, String str1, String str2) {
+	改为
+		public static String del(StateStack stateStack, String str1, String str2) {
+3.删除移入bk的StateService.java和StateTransfer.java
+4.新建一个StateService
+	（1）将StateTransfer和StateStack作为它的成员变量
+	（2）新建方法，根据用户名查询数据库是否有这个用户，对新用户做插表操作，并初始化stateStack和stateTransfer
+			public String StateServiceOnUserLogin(String fromUserName) 
+	（3）修改StateProccedue，直接从stateTransfer.transferState（）的返回值获取应当返回用户的提示语
+5.修改StateTransfer
+	（1）将
+			Func<State,String,String>
+		修改为
+			Func<StateStack,String,String>
+	（2）取消StateTransfer中的属性nowState
+		取消构造函数中对nowState的初始化
+	（3）取消transferState（）中对nowState中reqContent属性的设置，
+		 //nowState.setReqContent(reqContent);
+	（4）取消transferState（）中的状态转移操作
+	（5）修改transferState（）的返回值为String
+	（6）取消StateServiceOnUserLogin（）方法中“并用该状态初始化stateTransfer”的操作，改在StateService声明stateTransfer就进行初始化
+	（7）初始化转移矩阵时
+		1）取消transferMapSTUserPwd等
+		2）将transferMapSTUserHelp改名为transferMapSTUser
+		3）所有STUser状态下的转移都put到transferMapSTUser中，最后把transferMapSTUser加入stateMap
+			//2018-11-18
+			//初始化SceneType.STUser场景的转移出口，包括help、pwd********************
+			HashMap<String, Func<StateStack,String,String> > transferMapSTUser = new HashMap<String, Func<StateStack,String,String>>();   
+			//新增SceneType.STUser场景的转移出口help
+			transferMapSTUser.put("help", FuncBase::help);
+			//新增SceneType.STUser场景的转移出口help
+			transferMapSTUser.put("pwd", FuncBase::pwd);
+			//所有STUser状态下的转移都put到transferMapSTUser中，最后把transferMapSTUser加入stateMap
+			stateMap.put(SceneType.STUser, transferMapSTUser);
+6.修改CoreServiceImplJHSBC.java
+	（1）新增成员stateService
+	（2）取消成员stateTransfer和stateStack
+	（3）取消直接处理
+	/*   		//从数据库查询用户信息
+	        	User user = null;
+	        	user = db.getUserInfo(fromUserName);
+	        	int idUser = 0;
+	        	//如果没有查到就插入一条用户记录
+	        	if (null == user) {
+	        		User newUser = new User();
+	        		newUser.setWeixinId_User(fromUserName);
+	        		//int idUser = db.insertNewUser(newUser);
+	        		db.insertNewUser(newUser);        		
+	        		idUser  = newUser.getId_User();
+	        		
+	        	}else{//如果查询到就记录到状态栈中
+	        		idUser = user.getId_User();    			
+	        	}//if (null == user) 
+	
+	        	//如果查询idUser错误，或新增用户失败则返回
+	        	if(0 == idUser)
+	        		return "新增用户失败";
+	        	     	
+	    		//获取用户idUser成功后，如果是首次登录（状态栈为空），就记录到状态栈中，并用该状态初始化stateTransfer
+	    		if (stateStack.sizeof() == 0) {
+	    			State state = new State(idUser,fromUserName,0,"用户:"+fromUserName,SceneType.STUser);
+	    			stateStack.push(state);
+	    			
+	    			stateTransfer = new StateTransfer(state);
+	    			
+	    		}
+	        	        	
+	        	//在返回语开头加上下文信息
+	        	respContent = stateStack.getContext();*/
+	    改为引用stateService类的方法StateServiceOnUserLogin（）
+    		respContent = stateService.StateServiceOnUserLogin(fromUserName);
+	（3）移除StateProccedue定义   
+	（4）注释掉所有switch (reqContent)的内容 ,在对应未知加入
+			// 如果是其它文本则进一步处理
+			//进入状态机处理
+			respContent = stateService.StateProccedue(reqContent);
+    		System.out.println(respContent);
+    		textMessage.setContent(respContent);
+    		respMessage = textMessageUtil.messageToxml(textMessage);
+    		return respMessage;
+7.修改StateStack.java
+	（1）将方法getCurrentState() 中的
+			return stack[top];
 		改为
+			return stack[top-1]; 

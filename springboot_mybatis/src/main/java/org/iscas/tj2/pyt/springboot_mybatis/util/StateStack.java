@@ -61,7 +61,7 @@ public class StateStack {
 	 * @return
 	 */
 	public State getCurrentState() {
-		return stack[top];
+		return stack[top-1];
 	}
 
 

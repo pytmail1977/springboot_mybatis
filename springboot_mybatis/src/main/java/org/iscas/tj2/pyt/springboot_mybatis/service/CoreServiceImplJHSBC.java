@@ -45,10 +45,17 @@ public class CoreServiceImplJHSBC implements ICoreService {
 	//新建工程的步骤
 	int stepOfNewProj = 0; //0:未进入创建流程；1、2、3、4:用户在创建
 	
+	//2018-11-18 取消成员stateTransfer和stateStack
+/*	
 	//状态转移对象
 	StateTransfer stateTransfer = null;	
 	//初始化状态栈
-	StateStack stateStack = new StateStack(Const.maxStackDepth);
+	StateStack stateStack = new StateStack(Const.maxStackDepth);*/
+	
+	//2018-11-18 新增成员stateService
+	//状态服务
+	StateService stateService = new StateService();
+	
 	//存放定义新工程所用的信息
 	Map<String, String> mapProjInfo = new HashMap<String, String>();
 	
@@ -56,7 +63,8 @@ public class CoreServiceImplJHSBC implements ICoreService {
 	//人机交互轮数
 	int round = 0;
 	
-	//2018-11-17 传入reqContent参数给transferState
+	//2018-11-18 移除StateProccedue定义
+/*	//2018-11-17 传入reqContent参数给transferState
 	//2018-11-17 将返回值由void改为String
 	public String StateProccedue(String reqContent) {
 		System.out.println("Current state is: "+stateTransfer.getNowState().getStrComment());
@@ -70,7 +78,7 @@ public class CoreServiceImplJHSBC implements ICoreService {
 		stateTransfer.transferState(reqContent,strOrder, strArg1, strArg2);
 		String strReturn = stateTransfer.getNowState().getRespContent();
 		return strReturn;
-	}
+	}*/
 	
 	@Override
 	public String processRequest(HttpServletRequest request) {
@@ -91,7 +99,8 @@ public class CoreServiceImplJHSBC implements ICoreService {
 			//输出是第几轮交互
     		System.out.println("第"+(round++)+"轮交互：");
     		
-    		//从数据库查询用户信息
+    		//2018-11-18 取消以下直接处理
+ /*   		//从数据库查询用户信息
         	User user = null;
         	user = db.getUserInfo(fromUserName);
         	int idUser = 0;
@@ -121,7 +130,10 @@ public class CoreServiceImplJHSBC implements ICoreService {
     		}
         	        	
         	//在返回语开头加上下文信息
-        	respContent = stateStack.getContext();
+        	respContent = stateStack.getContext();*/
+    		
+    		//2018-11-18 改为引用stateService类的方法OnUserLogin（）
+    		respContent = stateService.StateServiceOnUserLogin(fromUserName);
         				
 			// 回复文本消息，注意此处TextMessage是在包org.iscas.tj2.pyt.springboot_mybatis.model.message.resp.TextMessage中定义的
 			TextMessage textMessage = new TextMessage();
@@ -155,7 +167,15 @@ public class CoreServiceImplJHSBC implements ICoreService {
                 return respMessage;
             } 
 			// 如果是其它文本则进一步处理
-        	
+			//进入状态机处理
+			respContent = stateService.StateProccedue(reqContent);
+    		System.out.println(respContent);
+    		textMessage.setContent(respContent);
+    		respMessage = textMessageUtil.messageToxml(textMessage);
+    		return respMessage;
+            
+            //2018-11-18 注释掉所有switch (reqContent)的内容 
+            /*
             switch (reqContent) {
                 case "1#": {
                     StringBuffer buffer = new StringBuffer();
@@ -310,7 +330,7 @@ public class CoreServiceImplJHSBC implements ICoreService {
                       }//switch (stepOfNewProj){
                 }//default:
             }//switch (reqContent) {
-
+*/
 
 	    } catch (Exception e) {
 	        e.printStackTrace();
