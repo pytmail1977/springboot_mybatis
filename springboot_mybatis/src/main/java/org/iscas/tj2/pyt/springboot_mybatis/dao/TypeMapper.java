@@ -1,5 +1,9 @@
 package org.iscas.tj2.pyt.springboot_mybatis.dao;
 
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+import org.iscas.tj2.pyt.springboot_mybatis.domain.Struct;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Type;
 
 public interface TypeMapper {
@@ -39,4 +43,7 @@ public interface TypeMapper {
 	 * @mbg.generated  Fri Oct 12 09:57:46 CST 2018
 	 */
 	int updateByPrimaryKey(Type record);
+	
+	//2018-11-20 新增
+	List<Type> selectTypesByUserId(@Param("IdUser") int intUserId);
 }

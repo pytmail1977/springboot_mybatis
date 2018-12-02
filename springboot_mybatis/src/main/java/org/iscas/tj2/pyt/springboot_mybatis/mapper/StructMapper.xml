@@ -121,4 +121,14 @@
       Id_NameSpace_Struct = #{idNamespaceStruct,jdbcType=INTEGER}
     where Id_Struct = #{idStruct,jdbcType=INTEGER}
   </update>
+  
+  
+  <!-- 2018-11-20 自己加的 -->
+  <select id="selectStructsByUserId"
+		parameterType="java.lang.Integer" resultMap="BaseResultMap">
+		SELECT Struct.* FROM User,StructUserRelation,Struct
+			WHERE User.Id_User = #{IdUser,jdbcType=INTEGER}
+				AND User.Id_User = StructUserRelation.Id_User
+				AND StructUserRelation.Id_Struct = Struct.Id_Type
+  </select>
 </mapper>

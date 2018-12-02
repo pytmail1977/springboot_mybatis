@@ -439,7 +439,7 @@
 
 #commit #
 
-2018-11-18
+2018-11-18/2
 1.修改Func.java
 	将
 		public State apply(S s, T1 t1, T2 t2);
@@ -532,3 +532,316 @@
 			return stack[top];
 		改为
 			return stack[top-1]; 
+			
+#commit#
+2018-11-18/3
+1.修改CoreServiceImplJHSBC.java
+	（1）由于不直接操作数据库，注释掉成员DbService db
+			//数据库操作对象
+			//private DbService db = new DbService();
+2.修改FuncBase.java
+	（1）新增DbService db
+			//数据库操作对象
+			private DbService db = new DbService();
+	（2）修改现有的两个转移处理函数help和pwd，取消对state.respContent的写入
+	（3）修改pwd，不使用stateStack.getContext();而使用stateStack.getPwd();
+	（4）完善whoami
+	（5）在转移表中增加TSUER场景的whoami操作
+			//新增SceneType.STUser场景的转移出口whoami
+			transferMapSTUser.put("whoami", FuncBase::whoami);	
+	（6）将所有函数的2个字符串参数合并为1个
+			String str1, String str2
+			-》
+			String str
+	
+3.修改State.java
+	（1）取消两个成员
+			//增加两项，分别是最近的用户输入，和最近给用户的输出
+			//private String reqContent;
+			//private String respContent;
+4.修改StateStack.java
+	（1）增加一个返回当前场景的函数
+				public String getPwd()
+5.修改StateService.java
+	（1）修改StateProccedue()
+			原来按空格分为多个子串，取前前三个作为transferState的输入，
+		/*		String[] strArray = reqContent.split(" ");
+				String strOrder = strArray[0];
+				String strArg1 = (strArray.length>1?strArray[1]:null);
+				String strArg2 = (strArray.length>2?strArray[2]:null);*/
+			改为在第一个空格处将整个串分成两部分，第一部分作为命令，后一部分整体作为参数	
+				String strOrder;
+				String strArgs;
+				int index = reqContent.indexOf(' ');
+				if (index>0) {
+					strOrder = reqContent.substring(0,reqContent.indexOf(' ')); 
+					strArgs = reqContent.substring(reqContent.indexOf(' ')+1); // "tocirah sneab"
+				}else {
+					//用户只输入了单个词
+					strOrder = reqContent;
+				}
+	（2）修改
+			State state = new State(idUser,fromUserName,0,"用户:"+fromUserName,SceneType.STUser);
+		为
+			State state = new State(idUser,Const.tablename_User,0,"用户:"+fromUserName,SceneType.STUser);
+6.修改StateTransfer.java
+	（1）修改transferState（）的参数
+		取消
+			String reqContent
+		将
+			String strArg1, String strArg2
+		合并为
+			String strArgs
+	（2）将
+		Func<StateStack,String,String>
+		改为
+		Func<StateStack,String>
+7.修改Func.java
+	将
+		public interface Func<S, T1, T2>
+	改为
+		public interface Func<S, T>	
+8.新建一个scene_state包，把和状态、场景相关的类都放到这个包中
+9.新写一个工具类DbCommonUtil.java。可以连接数据库，进行通用的增删改查操作，作为mybatis的互补。
+10.修改Const.java
+	（1）新增DbCommonUtil用来初始化数据库连接的
+		//jdbc
+		public static final String jdbcUrl = "jdbc:mysql://127.0.0.1:3306/java?useUnicode=true&characterEncoding=utf-8";
+		//数据库用户名
+		public static final String dbUser = "root";
+		//数据库用户密码
+		public static final String dbPwd = "pyt999";
+
+		
+2018-11-19
+1.修改Const.java
+	（1）新增各表名对应的id号
+			public static final HashMap<String,String> mapTableId= new HashMap<String,String>(){{
+				put(tablename_User,"Id_User");
+					put(tablebame_Project,"Id_Project");
+						put(tablebame_Function,"Id_Function");
+							put(tablebame_FuncStatement,"Id_FuncStatement");
+							put(tablebame_FuncVar,"Id_FuncVar");
+								put(tablebame_FuncVarItem,"Id_FuncVarItem");
+						put(tablebame_Var,"Id_Var");
+							put(tablebame_VarItem,"Id_VarItem");
+				put(tablebame_Struct,"Id_Struct");
+					put(tablebame_StructItem,"Id_StructItem");
+				put(tablebame_Type,"Id_Type");
+			}
+			};
+	（2）新增数据库名
+			public static final String dbSchema = "java";
+			
+2.修改FuncBase.java
+	（1）修改whoami，输出每个字段的值
+	（2）修改lsp
+3.修改ProjectMapper.xml
+	（1）增加
+			<!-- 2018-11-19 自己加的 -->
+			<select id="selectProjectsByUserId"
+				parameterType="java.lang.String" resultMap="BaseResultMap">
+				SELECT Project.*
+				FROM User,Role,UserRoleRelation,Permission,RolePRMSRelation,Project
+				WHERE User.Id_User = #{IdUser,jdbcType=INTEGER}
+				AND User.Id_User =
+				UserRoleRelation.Id_User
+				AND UserRoleRelation.Id_Role = Role.Id_Role
+				AND Role.Id_Role = RolePRMSRelation.Id_Role
+				AND RolePRMSRelation.Id_Permission = Permission.Id_Permission
+				AND Permission.Id_Project = Project.Id_Project
+			</select>
+4.修改ProjectMapper.java
+	（1）增加
+		 List<Project> selectProjectsByUserId(@Param("IdUser") int intUserId);
+5.修改DbService.java
+	（1）增加
+		    public List<Project> getProjectsInfoByUserId(int intUserId) {
+	        //public Project getProjectsInfo(String strWeixinId) {
+	        	SqlSession session = sessionFactory.openSession();
+	        	List<Project> projects = null;
+	        	//Project projects = null;
+	        	ProjectMapper mapper = session.getMapper(ProjectMapper.class);
+	        	try {
+	        		projects = mapper.selectProjectsByUserId(intUserId);
+	        		session.commit();
+	        	} catch (Exception e) {
+	        		e.printStackTrace();
+	        		session.rollback();
+	        	}                 
+	        	return projects;
+	        }
+
+
+2018-11-20
+0.修改FuncBase.java
+	（1）完善lss
+	（2）完善lst
+	（3）完善cdp
+1.修改TypeMapper.xml
+	（1）增加
+		<select id="selectTypesByUserId"
+			parameterType="java.lang.Integer" resultMap="BaseResultMap">
+			SELECT Type.* FROM User,TypeUserRelation,Type
+				WHERE User.Id_User = #{IdUser,jdbcType=INTEGER}
+					AND User.Id_User = TypeUserRelation.Id_User
+					AND TypeUserRelation.Id_Type = Type.Id_Type
+	 	</select>
+2.修改StructMapper.xml
+	（1）增加
+		  <!-- 2018-11-20 自己加的 -->
+		  <select id="selectStructsByUserId"
+				parameterType="java.lang.Integer" resultMap="BaseResultMap">
+				SELECT Struct.* FROM User,StructUserRelation,Struct
+					WHERE User.Id_User = #{IdUser,jdbcType=INTEGER}
+						AND User.Id_User = StructUserRelation.Id_User
+						AND StructUserRelation.Id_Struct = Struct.Id_Type
+		  </select>
+3.修改TypeMapper.java
+	（1）增加
+		 List<Type> selectTypesByUserId(@Param("IdUser") int intUserId);
+4.修改StructMapper.java
+	（1）增加
+		 List<Struct> selectStructsByUserId(@Param("IdUser") int intUserId);
+5.修改DbService.java
+	（1）增加
+		    public List<Type> getTypesInfoByUserId(int intUserId) {
+	        
+	        	SqlSession session = sessionFactory.openSession();
+	        	List<Type> types = null;
+	        	
+	        	TypeMapper mapper = session.getMapper(TypeMapper.class);
+	        	try {
+	        		types = mapper.selectTypesByUserId(intUserId);
+	        		session.commit();
+	        	} catch (Exception e) {
+	        		e.printStackTrace();
+	        		session.rollback();
+	        	}                 
+	        	return types;
+	    	}
+    （2）增加
+		    public List<Struct> getStructsInfoByUserId(int intUserId) {
+		        
+		    	SqlSession session = sessionFactory.openSession();
+		    	List<Struct> structs = null;
+		    	
+		    	StructMapper mapper = session.getMapper(StructMapper.class);
+		    	try {
+		    		structs = mapper.selectStructsByUserId(intUserId);
+		    		session.commit();
+		    	} catch (Exception e) {
+		    		e.printStackTrace();
+		    		session.rollback();
+		    	}                 
+		    	return structs;
+		    }
+		        
+    （3）增加
+		    public Project getProjectByProjectId(int intProjectId) {
+		      
+		        	SqlSession session = sessionFactory.openSession();
+		        	Project project = null;
+		        	
+		        	ProjectMapper mapper = session.getMapper(ProjectMapper.class);
+		        	try {
+		        		project = mapper.selectByPrimaryKey(intProjectId);
+		        		session.commit();
+		        	} catch (Exception e) {
+		        		e.printStackTrace();
+		        		session.rollback();
+		        	}                 
+		        	return project;
+		    }
+#未完成#6.写一个测试Core
+
+2018-12-02
+-1.修改数据库，在Type表上增加名字和注释两个字段
+	ALTER TABLE `java`.`Type` 
+		ADD COLUMN `Name_Type` VARCHAR(45) NULL AFTER `Id_NameSpace_Type`,
+		ADD COLUMN `Memo_Type` VARCHAR(45) NULL AFTER `Name_Type`;
+
+0.修改FuncBase.java
+	（1）完善cdt
+	（2）完善cds
+	（3）完善addp
+	（4）完善adds	
+1.修改TypeMapper.xml
+	（1）增加
+
+2.修改StructMapper.xml
+	（1）增加
+
+3.修改TypeMapper.java
+	（1）增加
+4.修改StructMapper.java
+	（1）增加
+5.修改DbService.java
+	（1）增加getTypeByTypeId
+		    public Type getTypeByTypeId(int intTypeId) {
+		        
+		    	SqlSession session = sessionFactory.openSession();
+		    	Type type = null;
+		    	
+		    	TypeMapper mapper = session.getMapper(TypeMapper.class);
+		    	try {
+		    		type = mapper.selectByPrimaryKey(intTypeId);
+		    		session.commit();
+		    	} catch (Exception e) {
+		    		e.printStackTrace();
+		    		session.rollback();
+		    	}                 
+		    	return type;
+		    }
+    （2）增加getStructByStructId
+		    public Struct getStructByStructId(int intStructId) {
+		        
+		    	SqlSession session = sessionFactory.openSession();
+		    	Struct struct = null;
+		    	
+		    	StructMapper mapper = session.getMapper(StructMapper.class);
+		    	try {
+		    		struct = mapper.selectByPrimaryKey(intStructId);
+		    		session.commit();
+		    	} catch (Exception e) {
+		    		e.printStackTrace();
+		    		session.rollback();
+		    	}                 
+		    	return struct;
+		    }
+
+		        
+    （3）增加
+		    public int createStruct(int idUser,Struct struct) {
+		    	SqlSession session = sessionFactory.openSession();
+		    	int idStruct = 0;
+		    	int idStructUserRelation = 0;
+		
+		    	StructMapper structMapper = session.getMapper(StructMapper.class);
+		    	StructUserRelationMapper structUserRelationMapper = session.getMapper(StructUserRelationMapper.class);
+		    	try {
+		    		//插入Struct表
+		    		structMapper.insertSelective(struct);
+		    		idStruct = struct.getIdStruct();
+		    		if (0 == idStruct) {
+		    			return -1;
+		    		}   		    		
+		    		
+		    		//插入StructUserRelation
+		      		StructUserRelation structUserRelation = new StructUserRelation();
+		    		structUserRelation.setIdStruct(idStruct);
+		    		structUserRelation.setIdUser(idUser);
+		    		structUserRelationMapper.insertSelective(structUserRelation);
+		    		idStructUserRelation = structUserRelation.getIdStructuserrelation();
+		    		if (0 == idStructUserRelation) {
+		    			session.rollback();
+		    			return -2;
+		    		} 
+		    		session.commit();
+		    		
+		    	} catch (Exception e) {
+		    		e.printStackTrace();
+		    		session.rollback();
+		    	}                 
+		    	return 0;
+		    }   

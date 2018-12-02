@@ -204,6 +204,20 @@
 		AND RolePRMSRelation.Id_Permission = Permission.Id_Permission 
 		AND Permission.Id_Project = Project.Id_Project
   </select>
+
+  <!-- 2018-11-19 自己加的 -->
+  <select id="selectProjectsByUserId"
+		parameterType="java.lang.Integer" resultMap="BaseResultMap">
+		SELECT Project.*
+		FROM User,Role,UserRoleRelation,Permission,RolePRMSRelation,Project
+		WHERE User.Id_User = #{IdUser,jdbcType=INTEGER}
+		AND User.Id_User =
+		UserRoleRelation.Id_User
+		AND UserRoleRelation.Id_Role = Role.Id_Role
+		AND Role.Id_Role = RolePRMSRelation.Id_Role
+		AND RolePRMSRelation.Id_Permission = Permission.Id_Permission
+		AND Permission.Id_Project = Project.Id_Project
+  </select>
   
-  
+
 </mapper>

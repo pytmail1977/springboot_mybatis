@@ -23,11 +23,11 @@ import org.iscas.tj2.pyt.springboot_mybatis.dao.UserMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Project;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.User;
 import org.iscas.tj2.pyt.springboot_mybatis.model.message.resp.TextMessage;
+import org.iscas.tj2.pyt.springboot_mybatis.scene_state.State;
+import org.iscas.tj2.pyt.springboot_mybatis.scene_state.StateStack;
+import org.iscas.tj2.pyt.springboot_mybatis.scene_state.StateTransfer;
 import org.iscas.tj2.pyt.springboot_mybatis.util.MessageUtil;
-import org.iscas.tj2.pyt.springboot_mybatis.util.State;
-import org.iscas.tj2.pyt.springboot_mybatis.util.StateStack;
 import org.iscas.tj2.pyt.springboot_mybatis.util.TextMessageUtil;
-import org.iscas.tj2.pyt.springboot_mybatis.util.StateTransfer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +40,9 @@ public class CoreServiceImplJHSBC implements ICoreService {
 	@Autowired
     private TextMessageUtil textMessageUtil;
 	
+	//2018-11-18 由于不直接操作数据库，注释掉成员DbService db
 	//数据库操作对象
-	private DbService db = new DbService();
+	//private DbService db = new DbService();
 	//新建工程的步骤
 	int stepOfNewProj = 0; //0:未进入创建流程；1、2、3、4:用户在创建
 	

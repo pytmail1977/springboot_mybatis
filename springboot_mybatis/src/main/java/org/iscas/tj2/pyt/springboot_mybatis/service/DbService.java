@@ -2,6 +2,8 @@ package org.iscas.tj2.pyt.springboot_mybatis.service;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
 import org.apache.ibatis.io.Resources;
@@ -12,12 +14,18 @@ import org.iscas.tj2.pyt.springboot_mybatis.dao.PermissionMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.ProjectMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.RoleMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.RolePRMSRelationMapper;
+import org.iscas.tj2.pyt.springboot_mybatis.dao.StructMapper;
+import org.iscas.tj2.pyt.springboot_mybatis.dao.StructUserRelationMapper;
+import org.iscas.tj2.pyt.springboot_mybatis.dao.TypeMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.UserMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.UserRoleRelationMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Permission;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Project;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Role;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.RolePRMSRelation;
+import org.iscas.tj2.pyt.springboot_mybatis.domain.Struct;
+import org.iscas.tj2.pyt.springboot_mybatis.domain.StructUserRelation;
+import org.iscas.tj2.pyt.springboot_mybatis.domain.Type;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.User;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.UserRoleRelation;
 import org.springframework.stereotype.Repository;
@@ -179,4 +187,141 @@ public class DbService {
     	return intId;
     }	
 
+    
+    public List<Project> getProjectsInfoByUserId(int intUserId) {
+        
+        	SqlSession session = sessionFactory.openSession();
+        	List<Project> projects = null;
+        	//Project projects = null;
+        	ProjectMapper mapper = session.getMapper(ProjectMapper.class);
+        	try {
+        		projects = mapper.selectProjectsByUserId(intUserId);
+        		session.commit();
+        	} catch (Exception e) {
+        		e.printStackTrace();
+        		session.rollback();
+        	}                 
+        	return projects;
+    }
+    
+    //2018-11-20 新增
+    public List<Type> getTypesInfoByUserId(int intUserId) {
+        
+        	SqlSession session = sessionFactory.openSession();
+        	List<Type> types = null;
+        	
+        	TypeMapper mapper = session.getMapper(TypeMapper.class);
+        	try {
+        		types = mapper.selectTypesByUserId(intUserId);
+        		session.commit();
+        	} catch (Exception e) {
+        		e.printStackTrace();
+        		session.rollback();
+        	}                 
+        	return types;
+    }
+    
+    public List<Struct> getStructsInfoByUserId(int intUserId) {
+        
+    	SqlSession session = sessionFactory.openSession();
+    	List<Struct> structs = null;
+    	
+    	StructMapper mapper = session.getMapper(StructMapper.class);
+    	try {
+    		structs = mapper.selectStructsByUserId(intUserId);
+    		session.commit();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		session.rollback();
+    	}                 
+    	return structs;
+    }
+    
+    public Project getProjectByProjectId(int intProjectId) {
+      
+        	SqlSession session = sessionFactory.openSession();
+        	Project project = null;
+        	
+        	ProjectMapper mapper = session.getMapper(ProjectMapper.class);
+        	try {
+        		project = mapper.selectByPrimaryKey(intProjectId);
+        		session.commit();
+        	} catch (Exception e) {
+        		e.printStackTrace();
+        		session.rollback();
+        	}                 
+        	return project;
+    }
+    
+    //2018-12-02 加入
+    public Type getTypeByTypeId(int intTypeId) {
+        
+    	SqlSession session = sessionFactory.openSession();
+    	Type type = null;
+    	
+    	TypeMapper mapper = session.getMapper(TypeMapper.class);
+    	try {
+    		type = mapper.selectByPrimaryKey(intTypeId);
+    		session.commit();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		session.rollback();
+    	}                 
+    	return type;
+    }
+    
+    //2018-12-02加入
+    public Struct getStructByStructId(int intStructId) {
+        
+    	SqlSession session = sessionFactory.openSession();
+    	Struct struct = null;
+    	
+    	StructMapper mapper = session.getMapper(StructMapper.class);
+    	try {
+    		struct = mapper.selectByPrimaryKey(intStructId);
+    		session.commit();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		session.rollback();
+    	}                 
+    	return struct;
+    }
+    
+    //2018-12-02加入
+    public int createStruct(int idUser,Struct struct) {
+    	SqlSession session = sessionFactory.openSession();
+    	int idStruct = 0;
+    	int idStructUserRelation = 0;
+
+    	StructMapper structMapper = session.getMapper(StructMapper.class);
+    	StructUserRelationMapper structUserRelationMapper = session.getMapper(StructUserRelationMapper.class);
+    	try {
+    		//插入Struct表
+    		structMapper.insertSelective(struct);
+    		idStruct = struct.getIdStruct();
+    		if (0 == idStruct) {
+    			return -1;
+    		}   		    		
+    		
+    		//插入StructUserRelation
+      		StructUserRelation structUserRelation = new StructUserRelation();
+    		structUserRelation.setIdStruct(idStruct);
+    		structUserRelation.setIdUser(idUser);
+    		structUserRelationMapper.insertSelective(structUserRelation);
+    		idStructUserRelation = structUserRelation.getIdStructuserrelation();
+    		if (0 == idStructUserRelation) {
+    			session.rollback();
+    			return -2;
+    		} 
+    		session.commit();
+    		
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		session.rollback();
+    	}                 
+    	return 0;
+    }   
+
+
+    
 }

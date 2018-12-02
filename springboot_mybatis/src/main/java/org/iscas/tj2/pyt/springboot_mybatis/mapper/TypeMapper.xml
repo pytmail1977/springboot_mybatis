@@ -132,4 +132,15 @@
       Id_NameSpace_Type = #{idNamespaceType,jdbcType=INTEGER}
     where Id_Type = #{idType,jdbcType=INTEGER}
   </update>
+  
+  
+  <!-- 2018-11-20 自己加的 -->
+  <select id="selectTypesByUserId"
+		parameterType="java.lang.Integer" resultMap="BaseResultMap">
+		SELECT Type.* FROM User,TypeUserRelation,Type
+			WHERE User.Id_User = #{IdUser,jdbcType=INTEGER}
+				AND User.Id_User = TypeUserRelation.Id_User
+				AND TypeUserRelation.Id_Type = Type.Id_Type
+  </select>
+  
 </mapper>

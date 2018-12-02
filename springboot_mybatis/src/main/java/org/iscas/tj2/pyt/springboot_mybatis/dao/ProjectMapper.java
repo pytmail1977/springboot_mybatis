@@ -68,4 +68,9 @@ public interface ProjectMapper {
 	 List<Project> selectProjectsByWeixinId(@Param("weixinId") String strWeixinId);
 	 //@Select("SELECT * FROM Project WHERE Id_Project = 1;")
 	 //Project selectProjectsByWeixinId(@Param("weixinId") String strWeixinId);
+	 
+	 
+	 List<Project> selectProjectsByUserId(@Param("IdUser") int intUserId);
+	 
+
 }

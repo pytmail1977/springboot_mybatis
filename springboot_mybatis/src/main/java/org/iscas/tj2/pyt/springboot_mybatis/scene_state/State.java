@@ -1,4 +1,4 @@
-package org.iscas.tj2.pyt.springboot_mybatis.util;
+package org.iscas.tj2.pyt.springboot_mybatis.scene_state;
 
 import org.iscas.tj2.pyt.springboot_mybatis.SceneType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +11,10 @@ public class State {
 	private int intDepth; //上下文深度
 	private SceneType sceneType;//状态所属类型，需在构造函数中初始化
 	
+	//2018-11-18 取消这两个成员
 	//增加两项，分别是最近的用户输入，和最近给用户的输出
-	private String reqContent;
-	private String respContent;
+	//private String reqContent;
+	//private String respContent;
 	
 	/**
 	 * 构造函数
@@ -72,7 +73,7 @@ public class State {
 
 
 
-	public String getRespContent() {
+/*	public String getRespContent() {
 		return respContent;
 	}
 
@@ -86,6 +87,6 @@ public class State {
 
 	public void setReqContent(String reqContent) {
 		this.reqContent = reqContent;
-	}
+	}*/
 	
 }

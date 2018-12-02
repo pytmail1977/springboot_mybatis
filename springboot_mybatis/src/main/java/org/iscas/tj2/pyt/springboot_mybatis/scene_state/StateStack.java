@@ -1,4 +1,4 @@
-package org.iscas.tj2.pyt.springboot_mybatis.util;
+package org.iscas.tj2.pyt.springboot_mybatis.scene_state;
 
 public class StateStack {
 
@@ -35,6 +35,17 @@ public class StateStack {
 		String strTmp = "";
 		for(int i = 0;i<top; i++) {
 			strTmp += stack[i].getStrComment();
+			strTmp += "/";
+		}
+		strTmp += ":>";
+		return strTmp;		
+	}
+	
+	//2018-11-18 增加一个返回当前场景的函数
+	public String getPwd() {
+		String strTmp = "";
+		for(int i = 0;i<top; i++) {
+			strTmp += stack[i].getSceneType().toString();
 			strTmp += "/";
 		}
 		strTmp += ":>";
