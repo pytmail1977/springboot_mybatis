@@ -17,6 +17,7 @@ import org.iscas.tj2.pyt.springboot_mybatis.dao.RolePRMSRelationMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.StructMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.StructUserRelationMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.TypeMapper;
+import org.iscas.tj2.pyt.springboot_mybatis.dao.TypeUserRelationMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.UserMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.UserRoleRelationMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Permission;
@@ -26,6 +27,7 @@ import org.iscas.tj2.pyt.springboot_mybatis.domain.RolePRMSRelation;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Struct;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.StructUserRelation;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Type;
+import org.iscas.tj2.pyt.springboot_mybatis.domain.TypeUserRelation;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.User;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.UserRoleRelation;
 import org.springframework.stereotype.Repository;
@@ -97,6 +99,10 @@ public class DbService {
     }   
     
     public int createProject(int idUser,Project proj) {
+    	if (null == proj) {
+    		System.out.println("proj is null");
+    		return -1;
+    	}
     	SqlSession session = sessionFactory.openSession();
     	int idProject = 0;
     	int idPermission = 0;
@@ -112,6 +118,9 @@ public class DbService {
     	try {
     		//插入Project表
     		projectMapper.insertSelective(proj);
+        	if (null == proj) {
+        		System.out.println("proj is null");
+        	}
     		idProject = proj.getIdProject();
     		if (0 == idProject) {
     			return -1;
@@ -323,5 +332,38 @@ public class DbService {
     }   
 
 
-    
+    //2018-12-02加入
+    public int createType(int idUser,Type type) {
+    	SqlSession session = sessionFactory.openSession();
+    	int idType = 0;
+    	int idTypeUserRelation = 0;
+
+    	TypeMapper typeMapper = session.getMapper(TypeMapper.class);
+    	TypeUserRelationMapper typeUserRelationMapper = session.getMapper(TypeUserRelationMapper.class);
+    	try {
+    		//插入Type表
+    		typeMapper.insertSelective(type);
+    		idType = type.getIdType();
+    		if (0 == idType) {
+    			return -1;
+    		}   		    		
+    		
+    		//插入TypeUserRelation
+      		TypeUserRelation typeUserRelation = new TypeUserRelation();
+    		typeUserRelation.setIdType(idType);
+    		typeUserRelation.setIdUser(idUser);
+    		typeUserRelationMapper.insertSelective(typeUserRelation);
+    		idTypeUserRelation = typeUserRelation.getIdTypeuserrelation();
+    		if (0 == idTypeUserRelation) {
+    			session.rollback();
+    			return -2;
+    		} 
+    		session.commit();
+    		
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		session.rollback();
+    	}                 
+    	return 0;
+    }       
 }

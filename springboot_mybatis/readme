@@ -755,28 +755,31 @@
 		    }
 #未完成#6.写一个测试Core
 
-2018-12-02
--1.修改数据库，在Type表上增加名字和注释两个字段
+2018-12-02（修改了数据库，经过mybatis自动对象的再次生成：run as-》mybatis generate）
+0.修改数据库，在Type表上增加名字和注释两个字段
 	ALTER TABLE `java`.`Type` 
 		ADD COLUMN `Name_Type` VARCHAR(45) NULL AFTER `Id_NameSpace_Type`,
 		ADD COLUMN `Memo_Type` VARCHAR(45) NULL AFTER `Name_Type`;
+1.修改数据库后，重新执行工程右键-》run as mybatis generator。
+	之后发现大部分之前的修改都在，包括添加的sql，但是调试发现新建工程的时候取不到新插入的project的id。发现问题在于之前的一处修改在重新调用mybastis generator的时候被改了回去
+	重新进行修改
+	（1）ProjectMapper.xml
+	  	<insert id="insertSelective" parameterType="org.iscas.tj2.pyt.springboot_mybatis.domain.Project">
+	  改为
+		<insert id="insertSelective" parameterType="org.iscas.tj2.pyt.springboot_mybatis.domain.Project" useGeneratedKeys="true" keyProperty="idProject">
+	（2）相应地修改所有.xml
+2.修改FuncBase.java
+	（1）完善addp
+	（2）完善adds	
+	（3）完善addt
 
-0.修改FuncBase.java
-	（1）完善cdt
-	（2）完善cds
-	（3）完善addp
-	（4）完善adds	
-1.修改TypeMapper.xml
-	（1）增加
+3.修改StructMapper.xml
+	（1）将
+		AND StructUserRelation.Id_Struct = Struct.Id_Type
+		改为
+		AND StructUserRelation.Id_Struct = Struct.Id_Struct
 
-2.修改StructMapper.xml
-	（1）增加
-
-3.修改TypeMapper.java
-	（1）增加
-4.修改StructMapper.java
-	（1）增加
-5.修改DbService.java
+4.修改DbService.java
 	（1）增加getTypeByTypeId
 		    public Type getTypeByTypeId(int intTypeId) {
 		        
@@ -845,3 +848,22 @@
 		    	}                 
 		    	return 0;
 		    }   
+		    
+2018-12-03
+1.修改FuncBase.java
+	（1）完善cdp
+	（2）完善cds	
+	（3）完善cdt
+	以上函数，均做如下修改
+	（1）将
+			db.getProjectByProjectId(state.getIntId())
+		改为
+			db.getStructByStructId(Integer.parseInt(str))
+	（2）查询相应的dao对象后，先做是否为空的判断
+		if (project/struct/type == null ) {
+			return "cd失败，查询不到您指定的对象";			
+		}
+2.初始化SceneType.STProject场景的转移出口
+3.为解决控制台警告信息
+		Establishing SSL connection without server's identity verification is not recommended. According to MySQL 5.5.45+, 5.6.26+ and 5.7.6+ requirements SSL connection must be established by default if explicit option isn't set. For compliance with existing applications not using SSL the verifyServerCertificate property is set to 'false'. You need either to explicitly disable SSL by setting useSSL=false, or set useSSL=true and provide truststore for server certificate verification.
+	在
