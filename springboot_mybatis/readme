@@ -864,6 +864,48 @@
 			return "cd失败，查询不到您指定的对象";			
 		}
 2.初始化SceneType.STProject场景的转移出口
-3.为解决控制台警告信息
-		Establishing SSL connection without server's identity verification is not recommended. According to MySQL 5.5.45+, 5.6.26+ and 5.7.6+ requirements SSL connection must be established by default if explicit option isn't set. For compliance with existing applications not using SSL the verifyServerCertificate property is set to 'false'. You need either to explicitly disable SSL by setting useSSL=false, or set useSSL=true and provide truststore for server certificate verification.
-	在
+
+#commit #
+2018-12-03/2
+0.修改数据库
+	（1）将所有外键引用改为cascade
+		原因：无法删除用户的struct、type、project
+	（2）在StructItem中设置指向Struct的外键
+1.修改FuncBase.java
+	（1）完善delp
+	（2）完善dels	
+	（3）完善delt
+	（4）完善lssi
+	（5）完善cdsi
+2.修改DbService.java
+	（1）增加deleteProjectByProjectId
+	（2）增加deleteTypeByTypeId
+	（3）增加deleteStructByStructId
+	（4）增加getStructItemsInfoByStructId
+	（5）增加getStructItemByStructItemId
+	（6）增加createStructItem
+	（7）增加deleteStructItemByStructItemId
+3.修改StateTransfer.java
+	（1）根据Const.java中关于STXXX_HELP的定义，补全状态转移表中的
+		transferMapSTStruct
+		transferMapSTStructItem
+		transferMapSTType
+		transferMapSTProject	
+		transferMapSTFunc	
+		transferMapSTFuncStatement
+		transferMapSTFuncVar
+		transferMapSTFuncVarItem
+		transferMapSTVar
+		transferMapSTVarItem
+4.修改StructItemMapper.xml
+	（1）增加
+			<!-- 2018-12-03 自己加的 -->
+			<select id="selectStructItemsByStructId"
+				parameterType="java.lang.Integer" resultMap="BaseResultMap">
+				SELECT StructItem.* FROM StructItem,Struct
+				WHERE Struct.Id_Struct = #{IdStruct,jdbcType=INTEGER}
+				AND Struct.Id_Struct = StructItem.Id_Struct
+			</select>
+5.修改StructItemMapper.java
+	（1）增加
+		List<StructItem> selectStructItemsByStructId(@Param("IdStruct") int intStructId);		

@@ -170,4 +170,12 @@
       IsSampleType_StructItem = #{issampletypeStructitem,jdbcType=INTEGER}
     where Id_StructItem = #{idStructitem,jdbcType=INTEGER}
   </update>
+
+	<!-- 2018-12-03 自己加的 -->
+	<select id="selectStructItemsByStructId"
+		parameterType="java.lang.Integer" resultMap="BaseResultMap">
+		SELECT StructItem.* FROM StructItem,Struct
+		WHERE Struct.Id_Struct = #{IdStruct,jdbcType=INTEGER}
+		AND Struct.Id_Struct = StructItem.Id_Struct
+	</select>
 </mapper>

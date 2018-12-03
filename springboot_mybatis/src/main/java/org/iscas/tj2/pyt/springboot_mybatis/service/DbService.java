@@ -2,8 +2,8 @@ package org.iscas.tj2.pyt.springboot_mybatis.service;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.sql.SQLException;
-import java.sql.Types;
+/*import java.sql.SQLException;
+import java.sql.Types;*/
 import java.util.List;
 
 import org.apache.ibatis.io.Resources;
@@ -14,6 +14,7 @@ import org.iscas.tj2.pyt.springboot_mybatis.dao.PermissionMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.ProjectMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.RoleMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.RolePRMSRelationMapper;
+import org.iscas.tj2.pyt.springboot_mybatis.dao.StructItemMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.StructMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.StructUserRelationMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.TypeMapper;
@@ -25,13 +26,14 @@ import org.iscas.tj2.pyt.springboot_mybatis.domain.Project;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Role;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.RolePRMSRelation;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Struct;
+import org.iscas.tj2.pyt.springboot_mybatis.domain.StructItem;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.StructUserRelation;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Type;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.TypeUserRelation;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.User;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.UserRoleRelation;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
+
 
 //@Service("DbService")
 @Repository("DbService")
@@ -118,9 +120,6 @@ public class DbService {
     	try {
     		//插入Project表
     		projectMapper.insertSelective(proj);
-        	if (null == proj) {
-        		System.out.println("proj is null");
-        	}
     		idProject = proj.getIdProject();
     		if (0 == idProject) {
     			return -1;
@@ -182,7 +181,6 @@ public class DbService {
      */
     public int insertNewUser(User newUser) {
     	SqlSession session = sessionFactory.openSession();
-    	User user = null;
     	UserMapper mapper = session.getMapper(UserMapper.class);
     	int intId = 0;
     	try {
@@ -366,4 +364,132 @@ public class DbService {
     	}                 
     	return 0;
     }       
+    
+    //2018-12-03 加入
+    public int deleteProjectByProjectId(int intProjectId) {
+        
+    	SqlSession session = sessionFactory.openSession();
+    	int ret = 0;
+    	
+    	ProjectMapper mapper = session.getMapper(ProjectMapper.class);
+    	try {
+    		ret = mapper.deleteByPrimaryKey(intProjectId);
+    		session.commit();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		session.rollback();
+    	}                 
+    	return ret;
+    }
+    
+    public int deleteTypeByTypeId(int intTypeId) {
+        
+    	SqlSession session = sessionFactory.openSession();
+    	int ret = 0;
+    	
+    	TypeMapper mapper = session.getMapper(TypeMapper.class);
+    	try {
+    		ret = mapper.deleteByPrimaryKey(intTypeId);
+    		session.commit();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		session.rollback();
+    	}                 
+    	return ret;
+    }
+    
+    public int deleteStructByStructId(int intStructId) {
+        
+    	SqlSession session = sessionFactory.openSession();
+    	int ret = 0;
+    	
+    	StructMapper mapper = session.getMapper(StructMapper.class);
+    	try {
+    		ret = mapper.deleteByPrimaryKey(intStructId);
+    		session.commit();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		session.rollback();
+    	}                 
+    	return ret;
+    }
+    
+    //2018-12-03 新增
+    public List<StructItem> getStructItemsInfoByStructId(int intStructId) {
+        
+        	SqlSession session = sessionFactory.openSession();
+        	List<StructItem> structItems = null;
+        	
+        	StructItemMapper mapper = session.getMapper(StructItemMapper.class);
+        	try {
+        		structItems = mapper.selectStructItemsByStructId(intStructId);
+        		session.commit();
+        	} catch (Exception e) {
+        		e.printStackTrace();
+        		session.rollback();
+        	}                 
+        	return structItems;
+    }
+    
+    //2018-12-03加入
+    public StructItem getStructItemByStructItemId(int intStructItemId) {
+        
+    	SqlSession session = sessionFactory.openSession();
+    	StructItem struct = null;
+    	
+    	StructItemMapper mapper = session.getMapper(StructItemMapper.class);
+    	try {
+    		struct = mapper.selectByPrimaryKey(intStructItemId);
+    		session.commit();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		session.rollback();
+    	}                 
+    	return struct;
+    }
+    
+    //2018-12-02加入
+    public int createStructItem(int idUser,StructItem struct) {
+    	SqlSession session = sessionFactory.openSession();
+    	int idStructItem = 0;
+    	
+
+    	StructItemMapper structMapper = session.getMapper(StructItemMapper.class);
+    	try {
+    		//插入StructItem表
+    		structMapper.insertSelective(struct);
+    		idStructItem = struct.getIdStructitem();
+    		if (0 == idStructItem) {
+    			return -1;
+    		}   		    		
+    		
+    		session.commit();
+    		
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		session.rollback();
+    	}                 
+    	return 0;
+    }   
+    
+   public int deleteStructItemByStructItemId(int intStructItemId) {
+        
+    	SqlSession session = sessionFactory.openSession();
+    	int ret = 0;
+    	
+    	StructItemMapper mapper = session.getMapper(StructItemMapper.class);
+    	try {
+    		ret = mapper.deleteByPrimaryKey(intStructItemId);
+    		session.commit();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		session.rollback();
+    	}                 
+    	return ret;
+    }
+   
+   
+    
+//类结尾    
 }
+
