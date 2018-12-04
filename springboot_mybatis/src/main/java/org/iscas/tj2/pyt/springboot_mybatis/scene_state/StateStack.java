@@ -1,16 +1,25 @@
 package org.iscas.tj2.pyt.springboot_mybatis.scene_state;
 
+import org.iscas.tj2.pyt.springboot_mybatis.SceneType;
+
 public class StateStack {
 
 	private int max_size;
 	private int top;
 	private State[ ] stack;
 	
+	//为按场景的枚举类型返回中文，定义如下数组
+	private String[] STCNAME = {
+			"用户","结构","结构字段","类型","工程","函数","函数语句","函数变量","函数变量字段","全局变量","全局变量字段"
+	};
+
+	
 	public StateStack(int size) {
 		// TODO Auto-generated constructor stub
 		this.max_size = size;
 		this.top = 0;
-		this.stack = new State[max_size];		
+		this.stack = new State[max_size];
+		
 	}
 	
 	public int push(State state) {
@@ -45,7 +54,8 @@ public class StateStack {
 	public String getPwd() {
 		String strTmp = "";
 		for(int i = 0;i<top; i++) {
-			strTmp += stack[i].getSceneType().toString();
+			//strTmp += stack[i].getSceneType().toString();
+			strTmp += STCNAME[stack[i].getSceneType().ordinal()]+stack[i].getIntId();
 			strTmp += "/";
 		}
 		strTmp += ":>";

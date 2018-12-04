@@ -951,3 +951,90 @@
 	（1）增加
 		List<Var> selectVarsByProjectId(@Param("IdProject") int intProjectId);	
 10.为了避免用户在类似“cdv 2”的指令中给出不能转化为整形的参数，修改所有直接引用Integer.parseInt(str)的地方
+
+#commit#
+1.修改FuncBase.java
+	（1）完善lsvi
+	（2）完善addvi	
+	（3）完善delvi
+	（4）完善cdvi
+	（1）完善lsfvi
+	（2）完善addfvi	
+	（3）完善delfvi
+	（4）完善cdfvi	
+	（5）完善lsfv
+	（6）完善addfv	
+	（7）完善delfv
+	（8）完善cdfv
+2.修改DbService.java
+	（1）增加getVarItemsInfoByVarId
+	（2）增加getVarItemByVarItemId
+	（3）增加createVarItem
+	（4）增加deleteVarItemByVarItemId
+	（5）增加getFuncVarItemsInfoByFuncVarId
+	（6）增加getFuncVarItemByFuncVarItemId
+	（7）增加createFuncVarItem
+	（8）增加deleteFuncVarItemByFuncVarItemId
+	（9）增加getFuncVarsInfoByVarId
+	（10）增加getFuncVarByFuncVarId
+	（11）增加createFuncVar
+	（12）增加deleteFuncVarByFuncVarId
+4.修改VarItemMapper.xml
+	（1）增加
+		<select id="selectVarItemsByVarId"
+			parameterType="java.lang.Integer" resultMap="BaseResultMap">
+			SELECT VarItem.* FROM VarItem,Var
+			WHERE Var.Id_Var = #{IdVar,jdbcType=INTEGER}
+			AND Var.Id_Var = VarItem.Id_Var
+		</select>
+5.修改VarItemMapper.java
+	（1）增加
+		List<VarItem> selectVarItemsByVarId(@Param("IdVar") int intVarId);	
+6.修改StateTransfer.java
+	修改状态转移表初始化中，整段复制命令后，没有做相应修改的问题
+7.修改FuncVarItemMapper.xml
+	（1）增加
+		<select id="selectFuncVarItemsByFuncVarId"
+			parameterType="java.lang.Integer" resultMap="BaseResultMap">
+			SELECT FuncVarItem.* FROM FuncVarItem,FuncVar
+			WHERE FuncVar.Id_FuncVar = #{IdFuncVar,jdbcType=INTEGER}
+			AND FuncVar.Id_FuncVar = FuncVarItem.Id_FuncVar
+		</select>
+8.修改FuncVarItemMapper.java
+	（1）增加	
+		List<FuncVarItem> selectFuncVarItemsByFuncVarId(@Param("IdFuncVar") int intFuncVarId);
+		
+9.修改FuncVarMapper.java
+	（1）增加		
+		  <select id="selectFuncVarsByFunctionId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+					SELECT FuncVar.* FROM FuncVar,Function
+					WHERE Function.Id_Function = #{IdFunction,jdbcType=INTEGER}
+					AND Function.Id_Function = FuncVar.Id_Function
+		  </select>
+10.修改FuncVarMapper.java
+	（1）增加
+		List<FuncVar> selectFuncVarsByFunctionId(@Param("IdFunction") int intFunctionId);
+
+11.修改FuncStatementMapper.java
+	（1）增加		
+		<select id="selectFuncStatementsByFunctionId"
+			parameterType="java.lang.Integer" resultMap="BaseResultMap">
+			SELECT FuncStatement.* FROM FuncStatement,Function
+			WHERE Function.Id_Function = #{IdFunction,jdbcType=INTEGER}
+			AND Function.Id_Function = FuncStatement.Id_Function
+		</select>		
+12.修改FuncStatementMapper.java
+	（1）增加
+		List<FuncStatement> selectFuncStatementsByFunctionId(@Param("IdFunction") int intFunctionId);
+		
+13.	为按场景的枚举类型返回中文，定义如下数组
+	private String[] STCNAME = {
+			"用户","结构","结构字段","类型","工程","函数","函数语句","函数变量","函数变量字段","全局变量","全局变量字段"
+	};		
+14.在所有add操作，用到参数的地方检查参数是否为空
+
+#commit#
+
+###待改进###
+一、函数语句的输入交互方式
+addfs时可输入行号，否则默认递增

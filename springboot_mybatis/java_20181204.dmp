@@ -1,0 +1,682 @@
+-- MySQL dump 10.13  Distrib 5.7.18, for osx10.12 (x86_64)
+--
+-- Host: localhost    Database: java
+-- ------------------------------------------------------
+-- Server version	5.7.18-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `FuncProjectRelation`
+--
+
+DROP TABLE IF EXISTS `FuncProjectRelation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `FuncProjectRelation` (
+  `Id_FuncProjectRelation` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_Function` int(11) DEFAULT NULL,
+  `Id_Project` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Id_FuncProjectRelation`),
+  KEY `FK_FuncProjectRelation_2_Function_idx` (`Id_Function`),
+  KEY `FK_FuncProjectRelation_2_Project_idx` (`Id_Project`),
+  CONSTRAINT `FK_FuncProjectRelation_2_Function` FOREIGN KEY (`Id_Function`) REFERENCES `Function` (`Id_Function`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_FuncProjectRelation_2_Project` FOREIGN KEY (`Id_Project`) REFERENCES `Project` (`Id_Project`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `FuncProjectRelation`
+--
+
+LOCK TABLES `FuncProjectRelation` WRITE;
+/*!40000 ALTER TABLE `FuncProjectRelation` DISABLE KEYS */;
+INSERT INTO `FuncProjectRelation` VALUES (2,2,25),(3,3,27);
+/*!40000 ALTER TABLE `FuncProjectRelation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `FuncStatement`
+--
+
+DROP TABLE IF EXISTS `FuncStatement`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `FuncStatement` (
+  `Id_FuncStatement` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_Function` int(11) DEFAULT NULL,
+  `LineNO_FuncStatement` int(11) DEFAULT NULL,
+  `Content_FuncStatement` varchar(1000) DEFAULT NULL,
+  `Memo_FuncStatement` varchar(450) DEFAULT NULL,
+  `IfBreak_FuncStatement` int(11) DEFAULT NULL,
+  `IfAnnotate_FuncStatement` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Id_FuncStatement`),
+  KEY `FK_FuncStatement_2_Function_idx` (`Id_Function`),
+  CONSTRAINT `FK_FuncStatement_2_Function` FOREIGN KEY (`Id_Function`) REFERENCES `Function` (`Id_Function`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `FuncStatement`
+--
+
+LOCK TABLES `FuncStatement` WRITE;
+/*!40000 ALTER TABLE `FuncStatement` DISABLE KEYS */;
+/*!40000 ALTER TABLE `FuncStatement` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `FuncVar`
+--
+
+DROP TABLE IF EXISTS `FuncVar`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `FuncVar` (
+  `Id_FuncVar` int(11) NOT NULL AUTO_INCREMENT,
+  `Name_FuncVar` varchar(45) DEFAULT NULL,
+  `Id_Function` int(11) DEFAULT NULL,
+  `IsParameter_FuncVar` varchar(45) DEFAULT NULL,
+  `ParameterNO_FuncVar` int(11) DEFAULT NULL,
+  `Id_Type` int(11) DEFAULT NULL,
+  `IsSampleType_FuncVar` int(11) DEFAULT NULL,
+  `SampleValue_FuncVar` varchar(45) DEFAULT NULL,
+  `Storage_FuncVar` int(11) DEFAULT NULL,
+  `IsParameterPassValueOrAddress_FuncVar` int(11) DEFAULT NULL,
+  `Memo_FuncVar` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`Id_FuncVar`),
+  KEY `FK_FuncParameter_2_Function_idx` (`Id_Function`),
+  KEY `FK_FuncParameter_2_Type_idx` (`Id_Type`),
+  CONSTRAINT `FK_FuncParameter_2_Function` FOREIGN KEY (`Id_Function`) REFERENCES `Function` (`Id_Function`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_FuncParameter_2_Type` FOREIGN KEY (`Id_Type`) REFERENCES `Type` (`Id_Type`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `FuncVar`
+--
+
+LOCK TABLES `FuncVar` WRITE;
+/*!40000 ALTER TABLE `FuncVar` DISABLE KEYS */;
+INSERT INTO `FuncVar` VALUES (1,'fv1',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(2,'funcvar1',3,' 1',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+/*!40000 ALTER TABLE `FuncVar` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `FuncVarItem`
+--
+
+DROP TABLE IF EXISTS `FuncVarItem`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `FuncVarItem` (
+  `Id_FuncVarItem` int(11) NOT NULL AUTO_INCREMENT,
+  `Name_FuncVarItem` varchar(45) DEFAULT NULL,
+  `Id_FuncVar` int(11) DEFAULT NULL,
+  `NO_FuncVarItem` int(11) DEFAULT NULL,
+  `IsSampleType_FuncVarItem` int(11) DEFAULT NULL,
+  `SampleValue_FuncVarItem` varchar(45) DEFAULT NULL,
+  `Memo_FuncVarItem` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`Id_FuncVarItem`),
+  KEY `FK_FuncParameterItem_2_FuncParameter_idx` (`Id_FuncVar`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `FuncVarItem`
+--
+
+LOCK TABLES `FuncVarItem` WRITE;
+/*!40000 ALTER TABLE `FuncVarItem` DISABLE KEYS */;
+INSERT INTO `FuncVarItem` VALUES (1,'fv1_i1',1,NULL,NULL,NULL,NULL);
+/*!40000 ALTER TABLE `FuncVarItem` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `Function`
+--
+
+DROP TABLE IF EXISTS `Function`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Function` (
+  `Id_Function` int(11) NOT NULL AUTO_INCREMENT,
+  `IdReturnType_Function` varchar(45) DEFAULT NULL,
+  `Name_Function` varchar(45) DEFAULT NULL,
+  `IsInline_Function` int(11) DEFAULT NULL,
+  `IfBreak_Function` int(11) DEFAULT NULL,
+  `Id_NameSpace_Function` int(11) DEFAULT NULL,
+  `Memo_Function` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`Id_Function`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Function`
+--
+
+LOCK TABLES `Function` WRITE;
+/*!40000 ALTER TABLE `Function` DISABLE KEYS */;
+INSERT INTO `Function` VALUES (2,NULL,'func2',NULL,NULL,NULL,NULL),(3,NULL,'function1',NULL,NULL,NULL,'hello');
+/*!40000 ALTER TABLE `Function` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `NameSpace`
+--
+
+DROP TABLE IF EXISTS `NameSpace`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `NameSpace` (
+  `Id_NameSpace` int(11) NOT NULL AUTO_INCREMENT,
+  `Name_NameSpacecol` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`Id_NameSpace`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `NameSpace`
+--
+
+LOCK TABLES `NameSpace` WRITE;
+/*!40000 ALTER TABLE `NameSpace` DISABLE KEYS */;
+/*!40000 ALTER TABLE `NameSpace` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `Permission`
+--
+
+DROP TABLE IF EXISTS `Permission`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Permission` (
+  `Id_Permission` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_Project` int(11) DEFAULT NULL,
+  `Right_Permission` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Id_Permission`),
+  KEY `FK_Permission_2_Project_idx` (`Id_Project`),
+  CONSTRAINT `FK_Permission_2_Project` FOREIGN KEY (`Id_Project`) REFERENCES `Project` (`Id_Project`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Permission`
+--
+
+LOCK TABLES `Permission` WRITE;
+/*!40000 ALTER TABLE `Permission` DISABLE KEYS */;
+INSERT INTO `Permission` VALUES (1,1,1),(12,16,1),(17,25,1),(19,27,1);
+/*!40000 ALTER TABLE `Permission` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `Project`
+--
+
+DROP TABLE IF EXISTS `Project`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Project` (
+  `Id_Project` int(11) NOT NULL AUTO_INCREMENT,
+  `Name_Project` varchar(45) DEFAULT NULL,
+  `Db_Project` varchar(45) DEFAULT NULL,
+  `CreateDate_Project` datetime DEFAULT NULL,
+  `ModifyDate_Project` datetime DEFAULT NULL,
+  `Version_Project` varchar(45) DEFAULT NULL,
+  `Memo_Project` varchar(45) DEFAULT NULL,
+  `Status_Project` int(11) DEFAULT NULL,
+  `Opensource_Project` int(11) DEFAULT NULL,
+  `Request_Project` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`Id_Project`)
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Project`
+--
+
+LOCK TABLES `Project` WRITE;
+/*!40000 ALTER TABLE `Project` DISABLE KEYS */;
+INSERT INTO `Project` VALUES (1,'app1',NULL,'2018-11-01 09:30:00','2018-11-01 09:30:00','0.0.1',NULL,NULL,0,NULL),(16,'newProject',NULL,NULL,NULL,NULL,'created from weixin',NULL,NULL,NULL),(25,'mama',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(27,'newproj',NULL,NULL,NULL,NULL,'huhu',NULL,NULL,NULL);
+/*!40000 ALTER TABLE `Project` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `Role`
+--
+
+DROP TABLE IF EXISTS `Role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Role` (
+  `Id_Role` int(11) NOT NULL AUTO_INCREMENT,
+  `Name_Role` varchar(45) DEFAULT NULL,
+  `Desc_Role` varchar(45) DEFAULT NULL,
+  `Memo_Role` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`Id_Role`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Role`
+--
+
+LOCK TABLES `Role` WRITE;
+/*!40000 ALTER TABLE `Role` DISABLE KEYS */;
+INSERT INTO `Role` VALUES (1,'creator','creator of project 1',NULL),(11,'creatorOfProject_15',NULL,NULL),(12,'creatorOfProject_16',NULL,NULL),(13,'creatorOfProject_22',NULL,NULL),(16,'creatorOfProject_25',NULL,NULL),(17,'creatorOfProject_26',NULL,NULL),(18,'creatorOfProject_27',NULL,NULL);
+/*!40000 ALTER TABLE `Role` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `RolePRMSRelation`
+--
+
+DROP TABLE IF EXISTS `RolePRMSRelation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `RolePRMSRelation` (
+  `Id_RolePRMSRelation` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_Permission` int(11) DEFAULT NULL,
+  `Id_Role` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Id_RolePRMSRelation`),
+  KEY `FK_RolePRMSRelation_2_role_idx` (`Id_Role`),
+  KEY `FK_RolePRMSRelation_2_Permission_idx` (`Id_Permission`),
+  CONSTRAINT `FK_RolePRMSRelation_2_Permission` FOREIGN KEY (`Id_Permission`) REFERENCES `Permission` (`Id_Permission`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_RolePRMSRelation_2_role` FOREIGN KEY (`Id_Role`) REFERENCES `role` (`Id_Role`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `RolePRMSRelation`
+--
+
+LOCK TABLES `RolePRMSRelation` WRITE;
+/*!40000 ALTER TABLE `RolePRMSRelation` DISABLE KEYS */;
+INSERT INTO `RolePRMSRelation` VALUES (1,1,1),(12,12,12),(16,17,16),(18,19,18);
+/*!40000 ALTER TABLE `RolePRMSRelation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `Struct`
+--
+
+DROP TABLE IF EXISTS `Struct`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Struct` (
+  `Id_Struct` int(11) NOT NULL AUTO_INCREMENT,
+  `Name_Struct` varchar(45) DEFAULT NULL,
+  `Memo_Struct` varchar(45) DEFAULT NULL,
+  `Id_NameSpace_Struct` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Id_Struct`),
+  KEY `FK_Struct_2_NameSpace_idx` (`Id_NameSpace_Struct`),
+  CONSTRAINT `FK_Struct_2_NameSpace` FOREIGN KEY (`Id_NameSpace_Struct`) REFERENCES `NameSpace` (`Id_NameSpace`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Struct`
+--
+
+LOCK TABLES `Struct` WRITE;
+/*!40000 ALTER TABLE `Struct` DISABLE KEYS */;
+INSERT INTO `Struct` VALUES (3,'pytS',NULL,NULL),(4,'baba','爸爸',NULL);
+/*!40000 ALTER TABLE `Struct` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `StructItem`
+--
+
+DROP TABLE IF EXISTS `StructItem`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `StructItem` (
+  `Id_StructItem` int(11) NOT NULL AUTO_INCREMENT,
+  `NO_StructItem` int(11) DEFAULT NULL,
+  `Id_Type` int(11) DEFAULT NULL,
+  `Name_StructItem` varchar(45) DEFAULT NULL,
+  `DefaultValue_StructItem` varchar(45) DEFAULT NULL,
+  `Memo_StructItem` varchar(45) DEFAULT NULL,
+  `Id_NameSpace` int(11) DEFAULT NULL,
+  `IsSampleType_StructItem` int(11) DEFAULT NULL,
+  `Id_Struct` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Id_StructItem`),
+  KEY `FK_StructItem_2_NameSpace_idx` (`Id_NameSpace`),
+  KEY `FK_StructItem_2_Type_idx` (`Id_Type`),
+  KEY `FK_StructItem_2_Struct_idx` (`Id_Struct`),
+  CONSTRAINT `FK_StructItem_2_NameSpace` FOREIGN KEY (`Id_NameSpace`) REFERENCES `NameSpace` (`Id_NameSpace`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_StructItem_2_Struct` FOREIGN KEY (`Id_Struct`) REFERENCES `Struct` (`Id_Struct`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_StructItem_2_Type` FOREIGN KEY (`Id_Type`) REFERENCES `Type` (`Id_Type`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `StructItem`
+--
+
+LOCK TABLES `StructItem` WRITE;
+/*!40000 ALTER TABLE `StructItem` DISABLE KEYS */;
+/*!40000 ALTER TABLE `StructItem` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `StructUserRelation`
+--
+
+DROP TABLE IF EXISTS `StructUserRelation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `StructUserRelation` (
+  `Id_StructUserRelation` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_Struct` int(11) DEFAULT NULL,
+  `Id_User` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Id_StructUserRelation`),
+  KEY `FK_StructUserRelation_2_User_idx` (`Id_User`),
+  KEY `FK_StructUserRelation_2_Struct_idx` (`Id_Struct`),
+  CONSTRAINT `FK_StructUserRelation_2_User` FOREIGN KEY (`Id_User`) REFERENCES `user` (`Id_User`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `StructUserRelation`
+--
+
+LOCK TABLES `StructUserRelation` WRITE;
+/*!40000 ALTER TABLE `StructUserRelation` DISABLE KEYS */;
+INSERT INTO `StructUserRelation` VALUES (1,1,1),(2,2,1),(3,3,1),(4,4,1);
+/*!40000 ALTER TABLE `StructUserRelation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `Type`
+--
+
+DROP TABLE IF EXISTS `Type`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Type` (
+  `Id_Type` int(11) NOT NULL AUTO_INCREMENT,
+  `IsSample_Type` varchar(45) DEFAULT NULL,
+  `Id_Struct` int(11) DEFAULT NULL,
+  `SampleType_Type` varchar(45) DEFAULT NULL,
+  `Id_NameSpace_Type` int(11) DEFAULT NULL,
+  `Name_Type` varchar(45) DEFAULT NULL,
+  `Memo_Type` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`Id_Type`),
+  KEY `FK_Type_2_Struct_idx` (`Id_Struct`),
+  KEY `FK_Type_2_NameSpace_idx` (`Id_NameSpace_Type`),
+  CONSTRAINT `FK_Type_2_NameSpace` FOREIGN KEY (`Id_NameSpace_Type`) REFERENCES `NameSpace` (`Id_NameSpace`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK_Type_2_Struct` FOREIGN KEY (`Id_Struct`) REFERENCES `Struct` (`Id_Struct`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Type`
+--
+
+LOCK TABLES `Type` WRITE;
+/*!40000 ALTER TABLE `Type` DISABLE KEYS */;
+INSERT INTO `Type` VALUES (1,NULL,NULL,NULL,NULL,'type1',NULL);
+/*!40000 ALTER TABLE `Type` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `TypeUserRelation`
+--
+
+DROP TABLE IF EXISTS `TypeUserRelation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `TypeUserRelation` (
+  `Id_TypeUserRelation` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_Type` int(11) DEFAULT NULL,
+  `Id_User` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Id_TypeUserRelation`),
+  KEY `FK_ TypeUserRelation_2_Type_idx` (`Id_Type`),
+  KEY `FK_ TypeUserRelation_2_User_idx` (`Id_User`),
+  CONSTRAINT `FK_ TypeUserRelation_2_Type` FOREIGN KEY (`Id_Type`) REFERENCES `Type` (`Id_Type`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_ TypeUserRelation_2_User` FOREIGN KEY (`Id_User`) REFERENCES `user` (`Id_User`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `TypeUserRelation`
+--
+
+LOCK TABLES `TypeUserRelation` WRITE;
+/*!40000 ALTER TABLE `TypeUserRelation` DISABLE KEYS */;
+INSERT INTO `TypeUserRelation` VALUES (1,1,1);
+/*!40000 ALTER TABLE `TypeUserRelation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `User`
+--
+
+DROP TABLE IF EXISTS `User`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `User` (
+  `Id_User` int(11) NOT NULL AUTO_INCREMENT,
+  `WeixinId_User` varchar(45) NOT NULL,
+  `Account_User` varchar(45) DEFAULT NULL,
+  `Pwd_User` varchar(45) DEFAULT NULL,
+  `Name_User` varchar(45) DEFAULT NULL,
+  `Phone_User` varchar(45) DEFAULT NULL,
+  `Mark_User` int(11) DEFAULT NULL,
+  `Email_User` varchar(45) DEFAULT NULL,
+  `Memo_User` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`Id_User`,`WeixinId_User`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `User`
+--
+
+LOCK TABLES `User` WRITE;
+/*!40000 ALTER TABLE `User` DISABLE KEYS */;
+INSERT INTO `User` VALUES (1,'ocaDy1CWp497l5Kq21mkw3HflzaY','count','lao','pan','15901305901',0,NULL,NULL),(4,'weixinId','count','pyt',NULL,NULL,NULL,NULL,NULL),(5,'ocaDy1NtlIC8aQLaKwXNUK8PdHL0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+/*!40000 ALTER TABLE `User` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `UserMessage`
+--
+
+DROP TABLE IF EXISTS `UserMessage`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `UserMessage` (
+  `Id_UserMessage` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_User` int(11) DEFAULT NULL,
+  `TS_UserMessage` datetime DEFAULT NULL,
+  `Input_UserMessage` varchar(450) DEFAULT NULL,
+  `Output_UserMessage` varchar(450) DEFAULT NULL,
+  `State_UserMessage` varchar(45) DEFAULT NULL,
+  `Memo_UserMessage` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`Id_UserMessage`),
+  KEY `FK_Message_2_user_idx` (`Id_User`),
+  CONSTRAINT `FK_Message_2_user` FOREIGN KEY (`Id_User`) REFERENCES `user` (`Id_User`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `UserMessage`
+--
+
+LOCK TABLES `UserMessage` WRITE;
+/*!40000 ALTER TABLE `UserMessage` DISABLE KEYS */;
+/*!40000 ALTER TABLE `UserMessage` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `UserMessageTemplet`
+--
+
+DROP TABLE IF EXISTS `UserMessageTemplet`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `UserMessageTemplet` (
+  `Id_UserMessageTemplet` int(11) NOT NULL AUTO_INCREMENT,
+  `Name_UserMessageTemplet` varchar(45) DEFAULT NULL,
+  `Type_UserMessageTemplet` varchar(45) DEFAULT NULL,
+  `Head_UserMessageTemplet` varchar(45) DEFAULT NULL,
+  `Prefixion_UserMessageTemplet` varchar(45) DEFAULT NULL,
+  `Body_UserMessageTemplet` varchar(45) DEFAULT NULL,
+  `Postfix_UserMessageTemplet` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`Id_UserMessageTemplet`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `UserMessageTemplet`
+--
+
+LOCK TABLES `UserMessageTemplet` WRITE;
+/*!40000 ALTER TABLE `UserMessageTemplet` DISABLE KEYS */;
+/*!40000 ALTER TABLE `UserMessageTemplet` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `UserRoleRelation`
+--
+
+DROP TABLE IF EXISTS `UserRoleRelation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `UserRoleRelation` (
+  `Id_UserRoleRelation` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_Role` int(11) DEFAULT NULL,
+  `Id_User` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Id_UserRoleRelation`),
+  KEY `FK_UserRoleRelation_2_role_idx` (`Id_Role`),
+  KEY `FK_UserRoleRelation_2_user_idx` (`Id_User`),
+  CONSTRAINT `FK_UserRoleRelation_2_role` FOREIGN KEY (`Id_Role`) REFERENCES `role` (`Id_Role`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_UserRoleRelation_2_user` FOREIGN KEY (`Id_User`) REFERENCES `user` (`Id_User`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `UserRoleRelation`
+--
+
+LOCK TABLES `UserRoleRelation` WRITE;
+/*!40000 ALTER TABLE `UserRoleRelation` DISABLE KEYS */;
+INSERT INTO `UserRoleRelation` VALUES (1,1,1),(12,12,1),(13,13,1),(16,16,1),(17,17,1),(18,18,1);
+/*!40000 ALTER TABLE `UserRoleRelation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `Var`
+--
+
+DROP TABLE IF EXISTS `Var`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Var` (
+  `Id_Var` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_Type` int(11) DEFAULT NULL,
+  `Name_Var` varchar(45) DEFAULT NULL,
+  `Changable_Var` varchar(45) DEFAULT NULL,
+  `Memo_Var` varchar(45) DEFAULT NULL,
+  `IfBreak_Var` int(11) DEFAULT NULL,
+  `SampleValue_Var` varchar(45) DEFAULT NULL,
+  `Id_NameSpace_Var` int(11) DEFAULT NULL,
+  `IsSampleType_Var` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Id_Var`),
+  KEY `FK_Var_2_NameSapce_idx` (`Id_NameSpace_Var`),
+  CONSTRAINT `FK_Var_2_NameSapce` FOREIGN KEY (`Id_NameSpace_Var`) REFERENCES `NameSpace` (`Id_NameSpace`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Var`
+--
+
+LOCK TABLES `Var` WRITE;
+/*!40000 ALTER TABLE `Var` DISABLE KEYS */;
+INSERT INTO `Var` VALUES (2,NULL,'var',NULL,NULL,NULL,NULL,NULL,NULL),(3,NULL,'var1',NULL,' youyou',NULL,NULL,NULL,NULL);
+/*!40000 ALTER TABLE `Var` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `VarItem`
+--
+
+DROP TABLE IF EXISTS `VarItem`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `VarItem` (
+  `Id_VarItem` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_Var` int(11) DEFAULT NULL,
+  `NO_VarItem` int(11) DEFAULT NULL,
+  `SampleValue_VarItem` varchar(45) DEFAULT NULL,
+  `Memo_VarItem` varchar(45) DEFAULT NULL,
+  `IsSampleType_VarItem` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Id_VarItem`),
+  KEY `FK_VarItem_2_Var_idx` (`Id_Var`),
+  CONSTRAINT `FK_VarItem_2_Var` FOREIGN KEY (`Id_Var`) REFERENCES `Var` (`Id_Var`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `VarItem`
+--
+
+LOCK TABLES `VarItem` WRITE;
+/*!40000 ALTER TABLE `VarItem` DISABLE KEYS */;
+/*!40000 ALTER TABLE `VarItem` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `VarProjectRelation`
+--
+
+DROP TABLE IF EXISTS `VarProjectRelation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `VarProjectRelation` (
+  `Id_VarProjectRelation` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_Var` int(11) DEFAULT NULL,
+  `Id_Project` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Id_VarProjectRelation`),
+  KEY `FK_VarProjectRelation_2_Var_idx` (`Id_Var`),
+  KEY `FK_VarProjectRelation_2_Project_idx` (`Id_Project`),
+  CONSTRAINT `FK_VarProjectRelation_2_Project` FOREIGN KEY (`Id_Project`) REFERENCES `Project` (`Id_Project`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_VarProjectRelation_2_Var` FOREIGN KEY (`Id_Var`) REFERENCES `Var` (`Id_Var`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `VarProjectRelation`
+--
+
+LOCK TABLES `VarProjectRelation` WRITE;
+/*!40000 ALTER TABLE `VarProjectRelation` DISABLE KEYS */;
+INSERT INTO `VarProjectRelation` VALUES (2,2,25),(3,3,27);
+/*!40000 ALTER TABLE `VarProjectRelation` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2018-12-04 16:31:23

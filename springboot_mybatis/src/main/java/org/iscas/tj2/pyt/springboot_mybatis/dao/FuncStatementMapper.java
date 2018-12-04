@@ -1,5 +1,8 @@
 package org.iscas.tj2.pyt.springboot_mybatis.dao;
 
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.FuncStatement;
 
 public interface FuncStatementMapper {
@@ -39,4 +42,7 @@ public interface FuncStatementMapper {
 	 * @mbg.generated  Mon Dec 03 18:53:01 CST 2018
 	 */
 	int updateByPrimaryKey(FuncStatement record);
+	
+	//2018-12-04
+	List<FuncStatement> selectFuncStatementsByFunctionId(@Param("IdFunction") int intFunctionId);
 }

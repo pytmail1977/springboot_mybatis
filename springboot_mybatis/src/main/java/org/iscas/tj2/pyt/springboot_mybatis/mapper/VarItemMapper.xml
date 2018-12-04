@@ -145,4 +145,12 @@
       IsSampleType_VarItem = #{issampletypeVaritem,jdbcType=INTEGER}
     where Id_VarItem = #{idVaritem,jdbcType=INTEGER}
   </update>
+  
+  <!-- 2018-12-03 自己加的 -->
+	<select id="selectVarItemsByVarId"
+		parameterType="java.lang.Integer" resultMap="BaseResultMap">
+		SELECT VarItem.* FROM VarItem,Var
+		WHERE Var.Id_Var = #{IdVar,jdbcType=INTEGER}
+		AND Var.Id_Var = VarItem.Id_Var
+	</select>
 </mapper>

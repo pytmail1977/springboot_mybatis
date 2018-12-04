@@ -1,6 +1,10 @@
 package org.iscas.tj2.pyt.springboot_mybatis.dao;
 
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.FuncVarItem;
+import org.iscas.tj2.pyt.springboot_mybatis.domain.VarItem;
 
 public interface FuncVarItemMapper {
 
@@ -39,4 +43,7 @@ public interface FuncVarItemMapper {
 	 * @mbg.generated  Mon Dec 03 18:53:01 CST 2018
 	 */
 	int updateByPrimaryKey(FuncVarItem record);
+	
+	//2018-12-04 新增
+	List<FuncVarItem> selectFuncVarItemsByFuncVarId(@Param("IdFuncVar") int intFuncVarId);
 }

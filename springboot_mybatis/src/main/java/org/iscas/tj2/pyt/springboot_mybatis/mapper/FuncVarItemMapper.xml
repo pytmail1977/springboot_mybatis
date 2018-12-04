@@ -159,4 +159,12 @@
       Memo_FuncVarItem = #{memoFuncvaritem,jdbcType=VARCHAR}
     where Id_FuncVarItem = #{idFuncvaritem,jdbcType=INTEGER}
   </update>
+  
+  <!-- 2018-12-04 自己加的 -->
+	<select id="selectFuncVarItemsByFuncVarId"
+		parameterType="java.lang.Integer" resultMap="BaseResultMap">
+		SELECT FuncVarItem.* FROM FuncVarItem,FuncVar
+		WHERE FuncVar.Id_FuncVar = #{IdFuncVar,jdbcType=INTEGER}
+		AND FuncVar.Id_FuncVar = FuncVarItem.Id_FuncVar
+	</select>
 </mapper>

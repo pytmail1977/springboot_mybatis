@@ -159,4 +159,12 @@
       IfAnnotate_FuncStatement = #{ifannotateFuncstatement,jdbcType=INTEGER}
     where Id_FuncStatement = #{idFuncstatement,jdbcType=INTEGER}
   </update>
+
+	<!-- 2018-12-04 -->
+	<select id="selectFuncStatementsByFunctionId"
+		parameterType="java.lang.Integer" resultMap="BaseResultMap">
+		SELECT FuncStatement.* FROM FuncStatement,Function
+		WHERE Function.Id_Function = #{IdFunction,jdbcType=INTEGER}
+		AND Function.Id_Function = FuncStatement.Id_Function
+	</select>	
 </mapper>
