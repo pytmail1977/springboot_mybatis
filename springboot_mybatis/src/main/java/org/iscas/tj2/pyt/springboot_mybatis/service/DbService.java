@@ -10,6 +10,8 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.iscas.tj2.pyt.springboot_mybatis.dao.FuncProjectRelationMapper;
+import org.iscas.tj2.pyt.springboot_mybatis.dao.FunctionMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.PermissionMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.ProjectMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.RoleMapper;
@@ -21,6 +23,10 @@ import org.iscas.tj2.pyt.springboot_mybatis.dao.TypeMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.TypeUserRelationMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.UserMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.UserRoleRelationMapper;
+import org.iscas.tj2.pyt.springboot_mybatis.dao.VarMapper;
+import org.iscas.tj2.pyt.springboot_mybatis.dao.VarProjectRelationMapper;
+import org.iscas.tj2.pyt.springboot_mybatis.domain.FuncProjectRelation;
+import org.iscas.tj2.pyt.springboot_mybatis.domain.Function;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Permission;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Project;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Role;
@@ -32,6 +38,8 @@ import org.iscas.tj2.pyt.springboot_mybatis.domain.Type;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.TypeUserRelation;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.User;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.UserRoleRelation;
+import org.iscas.tj2.pyt.springboot_mybatis.domain.Var;
+import org.iscas.tj2.pyt.springboot_mybatis.domain.VarProjectRelation;
 import org.springframework.stereotype.Repository;
 
 
@@ -448,8 +456,8 @@ public class DbService {
     	return struct;
     }
     
-    //2018-12-02加入
-    public int createStructItem(int idUser,StructItem struct) {
+    //2018-12-03加入
+    public int createStructItem(StructItem struct) {
     	SqlSession session = sessionFactory.openSession();
     	int idStructItem = 0;
     	
@@ -488,8 +496,195 @@ public class DbService {
     	return ret;
     }
    
+   public List<Function> getFunctionsInfoByProjectId(int intIdProject) {
+       
+	   	SqlSession session = sessionFactory.openSession();
+	   	List<Function> funcstions = null;
+	   	
+	   	FunctionMapper mapper = session.getMapper(FunctionMapper.class);
+	   	try {
+	   		funcstions = mapper.selectFunctionsByProjectId(intIdProject);
+	   		session.commit();
+	   	} catch (Exception e) {
+	   		e.printStackTrace();
+	   		session.rollback();
+	   	}                 
+	   	return funcstions;
+   }
    
-    
+   
+   public int createFunction(int idProject,Function function) {
+   
+	if (null == function) {
+   		System.out.println("function is null");
+   		return -1;
+   	}
+   	
+   	SqlSession session = sessionFactory.openSession();
+   	int idFunction = 0;
+   	int idFuncProjectRelation = 0;
+
+   	FunctionMapper functionMapper = session.getMapper(FunctionMapper.class);
+   	ProjectMapper roleMapper = session.getMapper(ProjectMapper.class);
+   	FuncProjectRelationMapper funcProjectRelationMapper = session.getMapper(FuncProjectRelationMapper.class);
+   	try {
+   		//插入Function表
+   		functionMapper.insertSelective(function);
+   		idFunction = function.getIdFunction();
+   		if (0 == idFunction) {
+   			return -1;
+   		}   		    		
+ 
+   		//插入 FuncProjectRelation表
+     	FuncProjectRelation funcProjectRelation = new FuncProjectRelation();
+   		funcProjectRelation.setIdFunction(idFunction);
+   		funcProjectRelation.setIdProject(idProject);
+   		funcProjectRelationMapper.insertSelective(funcProjectRelation);
+   		idFuncProjectRelation = funcProjectRelation.getIdFuncprojectrelation();
+   		if (0 == idFuncProjectRelation) {
+   			session.rollback();
+   			return -2;
+   		} 
+
+   		session.commit();
+   		
+   	} catch (Exception e) {
+   		e.printStackTrace();
+   		session.rollback();
+   	}                 
+   	return 0;
+   }   
+   
+   
+   
+   public int deleteFunctionByFunctionId(int intFunctionId) {
+       
+   	SqlSession session = sessionFactory.openSession();
+   	int ret = 0;
+   	
+   	FunctionMapper mapper = session.getMapper(FunctionMapper.class);
+   	try {
+   		ret = mapper.deleteByPrimaryKey(intFunctionId);
+   		session.commit();
+   	} catch (Exception e) {
+   		e.printStackTrace();
+   		session.rollback();
+   	}                 
+   	return ret;
+   }
+   
+      
+   public Function getFunctionByFunctionId(int intFunctionId) {
+       
+   	SqlSession session = sessionFactory.openSession();
+   	Function struct = null;
+   	
+   	FunctionMapper mapper = session.getMapper(FunctionMapper.class);
+   	try {
+   		struct = mapper.selectByPrimaryKey(intFunctionId);
+   		session.commit();
+   	} catch (Exception e) {
+   		e.printStackTrace();
+   		session.rollback();
+   	}                 
+   	return struct;
+   }
+   
+   
+   /////////////////
+   public List<Var> getVarsInfoByProjectId(int intIdProject) {
+       
+	   	SqlSession session = sessionFactory.openSession();
+	   	List<Var> funcstions = null;
+	   	
+	   	VarMapper mapper = session.getMapper(VarMapper.class);
+	   	try {
+	   		funcstions = mapper.selectVarsByProjectId(intIdProject);
+	   		session.commit();
+	   	} catch (Exception e) {
+	   		e.printStackTrace();
+	   		session.rollback();
+	   	}                 
+	   	return funcstions;
+  }
+  
+  
+  public int createVar(int idProject,Var var) {
+  
+	if (null == var) {
+  		System.out.println("var is null");
+  		return -1;
+  	}
+  	
+  	SqlSession session = sessionFactory.openSession();
+  	int idVar = 0;
+  	int idVarProjectRelation = 0;
+
+  	VarMapper varMapper = session.getMapper(VarMapper.class);
+  	ProjectMapper roleMapper = session.getMapper(ProjectMapper.class);
+  	VarProjectRelationMapper varProjectRelationMapper = session.getMapper(VarProjectRelationMapper.class);
+  	try {
+  		//插入Var表
+  		varMapper.insertSelective(var);
+  		idVar = var.getIdVar();
+  		if (0 == idVar) {
+  			return -1;
+  		}   		    		
+
+  		//插入 VarProjectRelation表
+    	VarProjectRelation varProjectRelation = new VarProjectRelation();
+  		varProjectRelation.setIdVar(idVar);
+  		varProjectRelation.setIdProject(idProject);
+  		varProjectRelationMapper.insertSelective(varProjectRelation);
+  		idVarProjectRelation = varProjectRelation.getIdVarprojectrelation();
+  		if (0 == idVarProjectRelation) {
+  			session.rollback();
+  			return -2;
+  		} 
+
+  		session.commit();
+  		
+  	} catch (Exception e) {
+  		e.printStackTrace();
+  		session.rollback();
+  	}                 
+  	return 0;
+  }   
+  
+  
+  
+  public int deleteVarByVarId(int intVarId) {
+      
+  	SqlSession session = sessionFactory.openSession();
+  	int ret = 0;
+  	
+  	VarMapper mapper = session.getMapper(VarMapper.class);
+  	try {
+  		ret = mapper.deleteByPrimaryKey(intVarId);
+  		session.commit();
+  	} catch (Exception e) {
+  		e.printStackTrace();
+  		session.rollback();
+  	}                 
+  	return ret;
+  }
+  
+     
+  public Var getVarByVarId(int intVarId) {
+      
+  	SqlSession session = sessionFactory.openSession();
+  	Var struct = null;
+  	
+  	VarMapper mapper = session.getMapper(VarMapper.class);
+  	try {
+  		struct = mapper.selectByPrimaryKey(intVarId);
+  		session.commit();
+  	} catch (Exception e) {
+  		e.printStackTrace();
+  		session.rollback();
+  	}                 
+  	return struct;
+  }
 //类结尾    
 }
 

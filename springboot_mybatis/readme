@@ -871,12 +871,24 @@
 	（1）将所有外键引用改为cascade
 		原因：无法删除用户的struct、type、project
 	（2）在StructItem中设置指向Struct的外键
+	（3）在（2）之后 2018-12-03 18:50重新调用了mybatis generator
+	（4）在所有.xml的insertSelective中增加useGeneratedKeys="true" keyProperty="XXX">
+
 1.修改FuncBase.java
 	（1）完善delp
 	（2）完善dels	
 	（3）完善delt
 	（4）完善lssi
 	（5）完善cdsi
+	（6）完善delsi
+	（7）完善lsf
+	（8）完善addf
+	（9）完善lsv
+	（10）完善addv
+	（11）完善delv
+	（12）完善cdv
+	（13）完善delf
+	（14）完善cdf
 2.修改DbService.java
 	（1）增加deleteProjectByProjectId
 	（2）增加deleteTypeByTypeId
@@ -885,6 +897,12 @@
 	（5）增加getStructItemByStructItemId
 	（6）增加createStructItem
 	（7）增加deleteStructItemByStructItemId
+	（8）增加getFunctionsInfoByProjectId
+	（9）增加createFunction
+	（10）增加deleteFunctionByFunctionId
+	（11）增加getVarByVarId
+	（12）增加deleteVarByVarId
+	（13）增加createVar
 3.修改StateTransfer.java
 	（1）根据Const.java中关于STXXX_HELP的定义，补全状态转移表中的
 		transferMapSTStruct
@@ -908,4 +926,28 @@
 			</select>
 5.修改StructItemMapper.java
 	（1）增加
-		List<StructItem> selectStructItemsByStructId(@Param("IdStruct") int intStructId);		
+		List<StructItem> selectStructItemsByStructId(@Param("IdStruct") int intStructId);	
+6.修改FunctionMapper.java
+	（1）增加
+		<select id="selectFunctionsByProjectId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+			SELECT Function.* FROM Function,Project,FuncProjectRelation
+			WHERE Project.Id_Project = #{IdProject,jdbcType=INTEGER}
+			AND Project.Id_Project = FuncProjectRelation.Id_Project
+			AND Function.Id_Function = FuncProjectRelation.Id_Function
+		</select>
+7.修改FunctionMapper.java
+	（1）增加
+		List<Function> selectFunctionsByProjectId(@Param("IdProject") int intProjectId);	
+
+8.修改VarMapper.java
+	（1）增加		
+	 	<select id="selectVarsByProjectId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+			SELECT Var.* FROM Var,Project,VarProjectRelation
+			WHERE Project.Id_Project = #{IdProject,jdbcType=INTEGER}
+			AND Project.Id_Project = VarProjectRelation.Id_Project
+			AND Var.Id_Var = VarProjectRelation.Id_Var
+		</select>		
+9.修改VarMapper.java
+	（1）增加
+		List<Var> selectVarsByProjectId(@Param("IdProject") int intProjectId);	
+10.为了避免用户在类似“cdv 2”的指令中给出不能转化为整形的参数，修改所有直接引用Integer.parseInt(str)的地方
