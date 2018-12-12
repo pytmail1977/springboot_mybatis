@@ -1047,7 +1047,388 @@
 2.将用户输入变为小写	
 	strOrder = strOrder.toLowerCase();
 
+
+2018-12-7
+一、测试时发现，用户2登录后，身份是用户1.分析是调用StateService的OnUserLogin函数后，虽然在User表里插入了相应记录，但是共用了同一个StateService，导致判断“stateTransfer.stateStack.sizeof() == 0”得不到预期结果（判用户是是否首次登录）。
+1.修改Const.java
+	新增
+		public static final int maxUserNumber = 1000;
+2.修改StateServer.java（此文件一直没有纳入git，导致删除StateServiceOnUserLogin（）函数后，需要手动恢复）
+	（1）重建StateServiceOnUserLogin（）函数
+	（2）修改
+			public String StateProccedue(String reqContent) {
+		为
+			public String StateProccedue(int idUser,String reqContent) {
+		将
+			String strReturn = stateTransfer.transferState(strOrder, strArgs);
+		改为
+			String strReturn = stateTransfer.transferState(idUser,strOrder, strArgs);
+3.修改StateTransfer.java
+	（1）增加
+		public StateStack[] stateStacks;
+	（2）在构造函数中增加
+			for(int i=0;i<Const.maxUserNumber;i++) {
+				stateStacks[i] = null;
+			}	
+	（3）修改
+		public String transferState(String strOrder, String strArgs) {
+		为
+		
+		函数中的stateStack改为stateStacks[idUser]
+	（4）注释掉
+		public StateStack stateStack = new StateStack(Const.maxStackDepth);
+4.修改CoreServiceImpJHSBC
+	（1）将
+			respContent = stateService.StateServiceOnUserLogin(fromUserName);
+		改为
+			
+	（1）将
+			respContent = stateService.StateProccedue(reqContent);
+		改为
+			respContent = stateService.StateProccedue(idUser,reqContent);
+二、增加授权功能
+0.修改数据库，将Permission表所有的Right_Permission字段都由1改为0（配合枚举类型中CREATETOR的序号）
+1.新建枚举类型
+	public enum PermisionType {
+		CREATE,
+		GRANTED	
+	}
+2.修改FuncBase.java
+	（1）将
+			int rightPermission = 1;
+		改为
+    		int rightPermission = PermisionType.CREATE.ordinal();	
+    （2）新增一个函数
+    	public static String grant(StateStack stateStack, String str)
+ 3.修改DbService.java
+ 	（1）新增
+ 		public int grantProjectToUser(int idUser,int idProject) {
+ 	（2）新增
+ 		public List<Project> getSelfCreatedProjectsInfoByUserId(int intUserId) {
+ 	（3）新增
+ 		public List<Permission> getPermissionsByGivenProjectAndRight(int IdProject,int IdRight)
+ 4.修改PerjectMapper.java
+ 	（1）新增
+ 		List<Project> selectSelfCreatedProjectsByUserId(@Param("IdUser") int intUserId);
+ 5.修改PerjectMapper.xml
+ 	（1）将
+		 	  <select id="selectProjectsByUserId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+				SELECT Project.*
+				FROM User,Role,UserRoleRelation,Permission,RolePRMSRelation,Project
+				WHERE User.Id_User = #{IdUser,jdbcType=INTEGER}
+				AND User.Id_User = UserRoleRelation.Id_User
+				AND UserRoleRelation.Id_Role = Role.Id_Role
+				AND Role.Id_Role = RolePRMSRelation.Id_Role
+				AND RolePRMSRelation.Id_Permission = Permission.Id_Permission
+				AND Permission.Id_Project = Project.Id_Project
+		 	 </select>
+  		改为
+		    <select id="selectProjectsByUserId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+				SELECT Project.*
+				FROM User,Role,UserRoleRelation,Permission,RolePRMSRelation,Project
+				WHERE User.Id_User = #{IdUser,jdbcType=INTEGER}
+				AND User.Id_User = UserRoleRelation.Id_User
+				AND UserRoleRelation.Id_Role = Role.Id_Role
+				AND Role.Id_Role = RolePRMSRelation.Id_Role
+				AND RolePRMSRelation.Id_Permission = Permission.Id_Permission
+				AND Permission.Id_Project = Project.Id_Project
+				AND Permission.Right_Permission in (0,1)
+		 	 </select>
+	（2）新建selectSelfCreatedProjectsByUserId，只选取自己创建的工程
+			<select id="selectSelfCreatedProjectsByUserId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+				SELECT Project.*
+				FROM User,Role,UserRoleRelation,Permission,RolePRMSRelation,Project
+				WHERE User.Id_User = #{IdUser,jdbcType=INTEGER}
+				AND User.Id_User = UserRoleRelation.Id_User
+				AND UserRoleRelation.Id_Role = Role.Id_Role
+				AND Role.Id_Role = RolePRMSRelation.Id_Role
+				AND RolePRMSRelation.Id_Permission = Permission.Id_Permission
+				AND Permission.Id_Project = Project.Id_Project
+				AND Permission.Right_Permission = 0
+		 	 </select>
+
+6.修改PermissionMapper.xml
+	（1）新增
+		  <!-- 2018-12-07 新增选取Id_Project和Right_Perssion符合要求的 -->
+		  <select id="selectByGivenProjectAndRight" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+				SELECT Permission.*
+				FROM Permission
+				WHERE Permission.Id_Project = #{IdProject,jdbcType=INTEGER}
+				AND Permission.Right_Permission = #{IdRight,jdbcType=INTEGER}
+		  </select>
+7.修改PermissionMapper.java
+	（1）新增
+			List<Permission> selectByGivenProjectAndRight(@Param("IdProject") int IdProject, @Param("IdRight") int IdRight);
+8.			
+对不存在的用户的grant说不，grant时如果有相应的role和permission不再新增
+
+2018-12-10
+0.修改数据库
+	（1）User表的第1个用户，weixinid改为admin。用于公共用户。作为根用户。
+1.修改FuncBase.java
+	（1）修改lsfs函数，不再输出函数行号，而是输出内容
+			strReturn += "函数语句id:" + funcStatement.getIdFuncstatement() + "; 函数语句行号:"+funcStatement.getLinenoFuncstatement(); 
+	（2）给STUser场景增加一个处理函数common，“退回”到公共用户
+			public static String common(StateStack stateStack, String str) {
+				
+				System.out.println("common: arg=" + str);
+				
+				String strReturn = null;
+				if(stateStack.sizeof()>1) {
+					stateStack.pop();
+					State state = stateStack.getCurrentState();
+					strReturn = "进入共用空间 "+ state.getSceneType().toString() + ": ";
+					strReturn += Const.mapHelpInfo.get(state.getSceneType());
+				}else {
+					strReturn = "无法操作，你已经在根路径";
+				}
+				return strReturn;
+			}// 进入到公共空间
+	（3）以STUser场景函数为模版，增加一组STCommon场景的函数，在STUser场景函数的基础上，去掉whoami、pwd和attr，
+		其它的函数名前加c，函数中取用户Id的地方将
+			state.getIntId()
+		替换为
+			Const.UserIdOfAdmin
+2.修改SceneType.java
+	（1）增加一个场景
+			STCommon
+3.修改Const.java
+	（1）增加一组帮助信息
+			public static final String STCommon_HELP = "您可用的命令：\n"
+					+ "help   -列出此帮助信息\n"
+					+ "lsp   -列出所有project\n"
+					+ "lst   -列出所有type\n"
+					+ "lss   -列出所有struct\n"
+					+ "cdp id   -进入指定的project\n"
+					+ "cdt id   -进入指定的type\n"
+					+ "cds id   -进入指定的struct\n"
+					+ "addp name   -新增一个project\n"
+					+ "addt name   -新增一个type\n"
+					+ "adds name   -新增一个struct\n"
+					+ "delp id   -删除一个project\n"
+					+ "delt id   -删除一个type\n"
+					+ "dels id   -删除一个struct\n"
+					+ "my   -回到用户场景";
+
+	（2）修改STUser_HELP，增加
+			+ "common   -查看共用对象";
+	（3）增加常量
+			public static final int maxUserNumber = 1000;
+	（4）修改
+			public static final Map<SceneType, String> mapHelpInfo = new HashMap<SceneType, String>(){{
+				put(SceneType.STUser, STUser_HELP);
+				put(SceneType.STStruct, STStruct_HELP);
+				put(SceneType.STStructItem, STStructItem_HELP);
+				put(SceneType.STType, STType_HELP);
+				put(SceneType.STProject, STProject_HELP);
+				put(SceneType.STFunc, STFunc_HELP);
+				put(SceneType.STFuncStatement, STFuncStatement_HELP);
+				put(SceneType.STFuncVar, STFuncVar_HELP);
+				put(SceneType.STFuncVarItem, STFuncVarItem_HELP);
+				put(SceneType.STVar, STVar_HELP);
+				put(SceneType.STVarItem, STVarItem_HELP);
+			}};
+		为
+			public static final Map<SceneType, String> mapHelpInfo = new HashMap<SceneType, String>(){{
+				put(SceneType.STCommon, STCommon_HELP);	
+				put(SceneType.STUser, STUser_HELP);
+				put(SceneType.STStruct, STStruct_HELP);
+				put(SceneType.STStructItem, STStructItem_HELP);
+				put(SceneType.STType, STType_HELP);
+				put(SceneType.STProject, STProject_HELP);
+				put(SceneType.STFunc, STFunc_HELP);
+				put(SceneType.STFuncStatement, STFuncStatement_HELP);
+				put(SceneType.STFuncVar, STFuncVar_HELP);
+				put(SceneType.STFuncVarItem, STFuncVarItem_HELP);
+				put(SceneType.STVar, STVar_HELP);
+				put(SceneType.STVarItem, STVarItem_HELP);
+			}};
+
+4.修改StateTransfer.java
+	（1）在状态转移表的USER场景下，增加1个出口
+		// 新增SceneType.STUser场景的转移出口common
+		transferMapSTUser.put("common", FuncBase::common);
+	（2）在状态转移表中增加COMMON场景
+5.修改StateService.java
+	（1）将
+			stateTransfer.stateStacks[idUser] = new StateStack(Const.maxStackDepth);
+		改为
+			stateTransfer.stateStacks[idUser] = new StateStack(Const.maxStackDepth);
+			State state = new State(Const.UserIdOfAdmin,Const.tablename_User,0,"根用户",SceneType.STCommon);
+			stateTransfer.stateStacks[idUser].push(state);
+	（2）将
+			State state = new State(idUser,Const.tablename_User,0,"用户："+fromUserName,SceneType.STUser);
+		改为
+			State state = new State(idUser,Const.tablename_User,1,"用户："+fromUserName,SceneType.STUser);
+
+	（3）将用户登录，将STUSER场景压入状态栈的操作注释掉
+			if(stateTransfer.stateStacks[idUser].sizeof() == 0 )
+		改为（注意判断条件由==0改为==1）
+			//如果用户对应的状态栈为空就把当前状态压入栈		
+			if(stateTransfer.stateStacks[idUser].sizeof() == 1 ) {
+				State state = new State(idUser,Const.tablename_User,1,"用户："+fromUserName,SceneType.STUser);
+				stateTransfer.stateStacks[idUser].push(state);			
+			}
+	（4）为了在用户退回公共空间后不回因为以下语句再次直接回到用户空间注销（3）中的语句
+6.修改StateStack.java
+	（1）将
+			private String[] STCNAME = {
+					"用户","结构","结构字段","类型","工程","函数","函数语句","函数变量","函数变量字段","全局变量","全局变量字段"
+			};
+		改为
+			private String[] STCNAME = {
+					"用户","结构","结构字段","类型","工程","函数","函数语句","函数变量","函数变量字段","全局变量","全局变量字段","共用对象"
+			};		
+	
+	
+2018-12-11
+1.修改StateService.java
+	（1）将
+			strOrder = strOrder.toLowerCase();
+			String strReturn = stateTransfer.transferState(idUser,strOrder, strArgs);
+		改为
+			strOrder = strOrder.toLowerCase();
+			//2018-12-11 如果是my指令，则直接操作
+			if(stateTransfer.stateStacks[idUser].sizeof() == 1 && strOrder.equals("home")) {
+				State state = new State(idUser,Const.tablename_User,1,"用户："+idUser,SceneType.STUser);
+				stateTransfer.stateStacks[idUser].push(state);	
+				return "进入用户空间";
+			}
+	（2）将
+			State state = new State(Const.UserIdOfAdmin,Const.tablename_User,0,"根用户",SceneType.STCommon);
+			stateTransfer.stateStacks[idUser].push(state);
+		改为
+			//2018-12-10 增加下面两行
+			State state = new State(Const.UserIdOfAdmin,Const.tablename_User,0,"根用户",SceneType.STCommon);
+			//2018-12-11 增加下面判断，如果是管理员用户，在state中做记录
+			if(fromUserName.equals(Const.AdminUserWeixinId) ) {
+				state.setIsAdmin(true);
+			}
+			stateTransfer.stateStacks[idUser].push(state);
+	（3）取消修改（2），当用户是admin时，第一个状态节点的场景定为STCommonAdmin
+		将
+			//2018-12-10 增加下面两行
+			State state = new State(Const.UserIdOfAdmin,Const.tablename_User,0,"根用户",SceneType.STCommon);
+			//2018-12-11 增加下面判断，如果是管理员用户，在state中做记录
+			if(fromUserName.equals(Const.AdminUserWeixinId) ) {
+				state.setIsAdmin(true);
+			}
+		改为
+			stateTransfer.stateStacks[idUser].push(state);
+			State state;
+			if(fromUserName.equals(Const.AdminUserWeixinId)) {
+				state = new State(Const.UserIdOfAdmin,Const.tablename_User,0,"根用户",SceneType.STCommonAdmin);
+			}else{
+				state = new State(Const.UserIdOfAdmin,Const.tablename_User,0,"根用户",SceneType.STCommonUser);
+			}
+			stateTransfer.stateStacks[idUser].push(state);
+2.修改StateTransfer.java
+	（1）取消SceneType.STCommon场景的转移出口my
+	（2）增加SceneType.STCommon场景的转移出口pwd
+	（3）将“STCommon”替换为“STCommonAdmin”
+	（4）增加STCommonUser场景的状态转移项
+			//初始化SceneType.STCommonUser场景的转移出口，包括help、pwd、whoami、attr********************
+			HashMap<String, Func<StateStack,String> > transferMapSTCommonUser = new HashMap<String, Func<StateStack,String>>();   
+			//新增SceneType.STCommonUser场景的转移出口help
+			transferMapSTCommonUser.put("help", FuncBase::help);
+			//新增SceneType.STCommonUser场景的转移出口help
+			transferMapSTCommonUser.put("pwd", FuncBase::pwd);
+			//新增SceneType.STCommonUser场景的转移出口lsf
+			transferMapSTCommonUser.put("lsf", FuncBase::clsf);
+			//新增SceneType.STCommonUser场景的转移出口lst
+			transferMapSTCommonUser.put("lst", FuncBase::clst);
+			// 新增SceneType.STCommonUser场景的转移出口lss
+			transferMapSTCommonUser.put("lss", FuncBase::clss);
+			// 新增SceneType.STCommonUser场景的转移出口cdp
+			transferMapSTCommonUser.put("cdp", FuncBase::ccdp);
+			// 新增SceneType.STCommonUser场景的转移出口cdt
+			transferMapSTCommonUser.put("cdt", FuncBase::ccdt);
+			// 新增SceneType.STCommonUser场景的转移出口cds
+			transferMapSTCommonUser.put("cds", FuncBase::ccds);		
+3.修改FuncBase.java
+	（1）修改dc函数
+		dc后不输出help信息（太乱）
+		//strReturn += Const.mapHelpInfo.get(state.getSceneType());
+	（2）增加clsf函数
+	（3）增加ccdf函数
+4.修改Const.java
+	（1）增加AdminUserWeixinId，记录管理员用户的微信id
+			public static final String AdminUserWeixinId = "ocaDy1CWp497l5Kq21mkw3HflzaY";
+	（2）将“Common”替换为“CommonAdmin”
+	（3）增加场景STCommonUser的help信息
+		public static final String STCommonUser_HELP = "您可用的命令：\n"
+			+ "help   -列出此帮助信息\n"
+			+ "pwd   -显示当前所处的场景\n"
+			+ "lsf   -列出所有函数\n"
+			+ "lst   -列出所有type\n"
+			+ "lss   -列出所有struct\n"
+			+ "cdf id   -进入指定的函数\n"
+			+ "cdt id   -进入指定的type\n"
+			+ "cds id   -进入指定的struct\n"
+			+ "home   -回到用户场景";
+	（4）在mapHelpInfo初始化中增加
+		 put(SceneType.STCommonUser, STCommonUser_HELP);
+	
+5.修改State.java	
+	（1）增加成员变量
+			private boolean isAdmin;
+		表示是否管理员，决定对公共对象的访问权限，如果是我的微信登录则是管理员，否则是别人登录，目的是显示不同的help信息，支持不同的命令
+6.修改SceneType.java
+	（1）将
+			STCommon,
+		改为
+			STCommonUser,
+	（2）新增
+			STCommonAdmin
+7.修改StateStack.java
+	（1）将
+			private String[] STCNAME = {
+					"用户","结构","结构字段","类型","工程","函数","函数语句","函数变量","函数变量字段","全局变量","全局变量字段","共用对象"
+			};
+		改为
+			private String[] STCNAME = {
+					"用户","结构","结构字段","类型","工程","函数","函数语句","函数变量","函数变量字段","全局变量","全局变量字段","共用对象","共用对象(管理员模式)"
+			};	
+
+2018-12-12
+1.修改StateStack.java
+	（1）修改getPwd()函数，如果没有第1层栈，或第1层栈不是STUser那么把第0层栈（即共用对象显示出来），否则不显示。
+		将
+			public String getPwd() {	
+				String strTmp = "";
+				for(int i = 0;i<top; i++) {
+					//strTmp += stack[i].getSceneType().toString();
+					strTmp += STCNAME[stack[i].getSceneType().ordinal()]+stack[i].getIntId();
+					strTmp += "/";
+				}
+				strTmp += ":>";
+				return strTmp;		
+			}
+		改为
+			public String getPwd() {
+				String strTmp = "";
+				int begin = 0;
+				if(top>1?stack[1].getSceneType().equals(SceneType.STUser):false) {
+					begin = 1;
+				}
+				for(int i = begin;i<top; i++) {
+					//strTmp += stack[i].getSceneType().toString();
+					strTmp += STCNAME[stack[i].getSceneType().ordinal()]+(i==0?"":stack[i].getIntId());
+					strTmp += "/";
+				}
+				strTmp += ":>";
+				return strTmp;		
+			}	
 ###待改进###
-一、函数语句的输入交互方式
-addfs时可输入行号，否则默认递增
+1、函数语句的输入交互方式
+	addfs时可输入行号，否则默认递增
+2、attr进入编辑模式，直接key=value
+3、将判断是否有访问权限的代码，归拢为函数
+\4、针对公共代码，增加一种权限——
+
+
+###错误###
+
+1、虽然不能列出别人创建的工程，但可以用id直接cd
+
 

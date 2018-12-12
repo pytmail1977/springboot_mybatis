@@ -10,6 +10,7 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.iscas.tj2.pyt.springboot_mybatis.PermisionType;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.FuncProjectRelationMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.FuncStatementMapper;
 import org.iscas.tj2.pyt.springboot_mybatis.dao.FuncVarItemMapper;
@@ -123,6 +124,79 @@ public class DbService {
     	return role;
     } 
 
+    public int grantProjectToUser(int idUser,int idProject) {
+    	SqlSession session = sessionFactory.openSession();
+    	
+    	int idPermission = 0;
+    	int idRole = 0;
+    	int idRolePRMSRelation = 0;
+    	int idUserRoleRelation = 0;
+    	int rightPermission = PermisionType.GRANTED.ordinal();
+    	ProjectMapper projectMapper = session.getMapper(ProjectMapper.class);
+    	PermissionMapper permissionMapper = session.getMapper(PermissionMapper.class);
+    	RoleMapper roleMapper = session.getMapper(RoleMapper.class);
+    	RolePRMSRelationMapper rolePRMSRelationMapper = session.getMapper(RolePRMSRelationMapper.class);
+    	UserRoleRelationMapper userRoleRelationMapper = session.getMapper(UserRoleRelationMapper.class);
+    	try {		    		
+    		//插入 Permission表
+    		Permission permission = new Permission();
+    		permission.setIdProject(idProject);
+    		permission.setRightPermission(rightPermission);
+    		permissionMapper.insertSelective(permission);
+    		idPermission = permission.getIdPermission();
+
+    		//插入 Role表
+       		Role role = new Role();
+    		role.setNameRole("grantedUserOfProject_"+idProject);
+    		roleMapper.insertSelective(role);
+    		idRole = role.getIdRole();
+    		if (0 == idRole) {
+    			session.rollback();
+    			return -1;
+    		} 	
+    		//插入 RolePRMSRelation表
+      		RolePRMSRelation rolePRMSRelation = new RolePRMSRelation();
+    		rolePRMSRelation.setIdPermission(idPermission);
+    		rolePRMSRelation.setIdRole(idRole);
+    		rolePRMSRelationMapper.insertSelective(rolePRMSRelation);
+    		idRolePRMSRelation = rolePRMSRelation.getIdRoleprmsrelation();
+    		if (0 == idRolePRMSRelation) {
+    			session.rollback();
+    			return -2;
+    		} 
+    		//插入UserRoleRelation
+      		UserRoleRelation userRoleRelation = new UserRoleRelation();
+    		userRoleRelation.setIdRole(idRole);
+    		userRoleRelation.setIdUser(idUser);
+    		userRoleRelationMapper.insertSelective(userRoleRelation);
+    		idUserRoleRelation = userRoleRelation.getIdUserrolerelation();
+    		if (0 == idUserRoleRelation) {
+    			session.rollback();
+    			return -3;
+    		} 
+    		session.commit();
+    		
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		session.rollback();
+    	}                 
+    	return 0;
+    }	
+    
+    public List<Permission> getPermissionsByGivenProjectAndRight(int IdProject,int IdRight) {
+        	SqlSession session = sessionFactory.openSession();
+        	List<Permission> permissions = null;
+        	PermissionMapper mapper = session.getMapper(PermissionMapper.class);
+        	try {
+        		permissions = mapper.selectByGivenProjectAndRight(IdProject,IdRight);
+        		session.commit();
+        	} catch (Exception e) {
+        		e.printStackTrace();
+        		session.rollback();
+        	}                 
+        	return permissions;
+        }
+
     //以上是User相关数据库函数//////////////////////////////////////////////////////////////////////////////
     //以下是Project相关数据库函数//////////////////////////////////////////////////////////////////////////
 
@@ -141,7 +215,7 @@ public class DbService {
     	}                 
     	return projects;
     }
-      
+        
     
     public int createProject(int idUser,Project proj) {
     	if (null == proj) {
@@ -154,7 +228,9 @@ public class DbService {
     	int idRole = 0;
     	int idRolePRMSRelation = 0;
     	int idUserRoleRelation = 0;
-    	int rightPermission = 1;
+    	//2018-12-07 改用枚举类型初始化
+    	//int rightPermission = 1;
+    	int rightPermission = PermisionType.CREATE.ordinal();
     	ProjectMapper projectMapper = session.getMapper(ProjectMapper.class);
     	PermissionMapper permissionMapper = session.getMapper(PermissionMapper.class);
     	RoleMapper roleMapper = session.getMapper(RoleMapper.class);
@@ -232,8 +308,22 @@ public class DbService {
         	return projects;
     }
     
-
-    
+    public List<Project> getSelfCreatedProjectsInfoByUserId(int intUserId) {
+        
+    	SqlSession session = sessionFactory.openSession();
+    	List<Project> projects = null;
+    	//Project projects = null;
+    	ProjectMapper mapper = session.getMapper(ProjectMapper.class);
+    	try {
+    		projects = mapper.selectSelfCreatedProjectsByUserId(intUserId);
+    		session.commit();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		session.rollback();
+    	}                 
+    	return projects;
+}
+     
 
     
     public Project getProjectByProjectId(int intProjectId) {

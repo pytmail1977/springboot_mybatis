@@ -79,5 +79,6 @@ public interface ProjectMapper {
 	 
 	 List<Project> selectProjectsByUserId(@Param("IdUser") int intUserId);
 	 
-
+	 List<Project> selectSelfCreatedProjectsByUserId(@Param("IdUser") int intUserId);
+	 
 }

@@ -134,8 +134,16 @@ public class CoreServiceImplJHSBC implements ICoreService {
         	respContent = stateStack.getContext();*/
     		
     		//2018-11-18 改为引用stateService类的方法OnUserLogin（）
-    		respContent = stateService.StateServiceOnUserLogin(fromUserName);
-        				
+    		//respContent = stateService.StateServiceOnUserLogin(fromUserName);
+    		//2018-12-07 重写StateServiceOnUserLogin函数，返回用户id
+    		int idUser = stateService.StateServiceOnUserLogin(fromUserName);
+    		if(idUser<0) {
+    			respContent = "获取用户信息或新增用户失败";
+    		}else
+    		{
+    			respContent = "你好，"+fromUserName+"，您的用户id是"+idUser+".\n";
+    		}
+    					
 			// 回复文本消息，注意此处TextMessage是在包org.iscas.tj2.pyt.springboot_mybatis.model.message.resp.TextMessage中定义的
 			TextMessage textMessage = new TextMessage();
 			textMessage.setToUserName(fromUserName);
@@ -152,7 +160,7 @@ public class CoreServiceImplJHSBC implements ICoreService {
 			// 如果不是文本则回复……
 			//去掉对图像、音频、连接等处理，统一在前面作为非文本消息回复无法处理
 			if (!msgType.equals(MessageUtil.REQ_MESSAGE_TYPE_TEXT)) {
-	            respContent += "无法处理您发送的非文本消息！";
+	            respContent += Const.STUser_HELP;
 	            textMessage.setContent(respContent);
 	            // 将文本消息对象转换成xml字符串
 	            respMessage = textMessageUtil.messageToxml(textMessage);	
@@ -169,7 +177,7 @@ public class CoreServiceImplJHSBC implements ICoreService {
             } 
 			// 如果是其它文本则进一步处理
 			//进入状态机处理
-			respContent = stateService.StateProccedue(reqContent);
+			respContent = stateService.StateProccedue(idUser,reqContent);
     		System.out.println(respContent);
     		textMessage.setContent(respContent);
     		respMessage = textMessageUtil.messageToxml(textMessage);

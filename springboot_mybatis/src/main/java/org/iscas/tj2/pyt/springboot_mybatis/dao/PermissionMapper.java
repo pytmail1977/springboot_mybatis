@@ -1,5 +1,8 @@
 package org.iscas.tj2.pyt.springboot_mybatis.dao;
 
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
 import org.iscas.tj2.pyt.springboot_mybatis.domain.Permission;
 
 public interface PermissionMapper {
@@ -39,4 +42,7 @@ public interface PermissionMapper {
 	 * @mbg.generated  Mon Dec 03 18:53:01 CST 2018
 	 */
 	int updateByPrimaryKey(Permission record);
+	
+	//2018-12-07
+	List<Permission> selectByGivenProjectAndRight(@Param("IdProject") int IdProject, @Param("IdRight") int IdRight);
 }

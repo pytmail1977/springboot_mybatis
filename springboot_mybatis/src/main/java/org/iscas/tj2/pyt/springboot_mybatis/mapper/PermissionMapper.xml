@@ -110,4 +110,12 @@
       Right_Permission = #{rightPermission,jdbcType=INTEGER}
     where Id_Permission = #{idPermission,jdbcType=INTEGER}
   </update>
+  
+  <!-- 2018-12-07 新增选取Id_Project和Right_Perssion符合要求的 -->
+  <select id="selectByGivenProjectAndRight" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+		SELECT Permission.*
+		FROM Permission
+		WHERE Permission.Id_Project = #{IdProject,jdbcType=INTEGER}
+		AND Permission.Right_Permission = #{IdRight,jdbcType=INTEGER}
+  </select>
 </mapper>

@@ -10,6 +10,7 @@ public class State {
 	private String strComment; //上下文描述
 	private int intDepth; //上下文深度
 	private SceneType sceneType;//状态所属类型，需在构造函数中初始化
+	private boolean isAdmin;//表示是否管理员，决定对公共对象的访问权限，如果是我的微信登录则是管理员，否则是别人登录，目的是显示不同的help信息，支持不同的命令
 	
 	//2018-11-18 取消这两个成员
 	//增加两项，分别是最近的用户输入，和最近给用户的输出
@@ -29,6 +30,7 @@ public class State {
 		this.intDepth = intDepth;
 		this.strComment = strComment;
 		this.sceneType = sceneType;
+		this.setIsAdmin(false);
 	}
 
 	public String getStrTable() {
@@ -70,6 +72,16 @@ public class State {
 	public void setSceneType(SceneType sceneType) {
 		this.sceneType = sceneType;
 	}
+
+	public boolean getIsAdmin() {
+		return isAdmin;
+	}
+
+	public void setIsAdmin(boolean isAdmin) {
+		this.isAdmin = isAdmin;
+	}
+
+
 
 
 
